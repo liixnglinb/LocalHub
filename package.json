@@ -1,0 +1,110 @@
+{
+  "name": "local-hub",
+  "version": "1.14.0",
+  "description": "个人本地全能工具中心 · LocalHub",
+  "author": "李星历",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "pack:dir": "vite build && electron-builder --dir",
+    "pack:win": "vite build && electron-builder --win",
+    "pack:nsis": "vite build && electron-builder --win nsis"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^0.441.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.41",
+    "tailwindcss": "^3.4.9",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.lixingli.localhub",
+    "productName": "LocalHub",
+    "copyright": "Copyright © 2026 李星历",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "publish": null,
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "build/icons/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/icons",
+        "to": "icons",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "electron/canvas-app",
+        "to": "canvas-app",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "electron/mindmap",
+        "to": "mindmap",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "electron/leaderboard",
+        "to": "leaderboard",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icons/icon.ico",
+      "artifactName": "LocalHub-${version}-Setup.${ext}",
+      "requestedExecutionLevel": "asInvoker",
+      "publisherName": "LocalHub"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LocalHub",
+      "uninstallDisplayName": "LocalHub 个人工具中心",
+      "artifactName": "LocalHub-${version}-Setup.${ext}"
+    },
+    "asar": true,
+    "compression": "normal"
+  }
+}
