@@ -13,28 +13,22 @@ import {
 Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip);
 
 /**
- * TrendChart — 基于 Chart.js 的网格状平滑趋势图（LocalHub 深色玻璃拟态版）
- * - tension 曲线平滑 + 渐变填充
- * - 网格背景（细线）+ 横轴日期刻度 + 纵轴数值刻度
- * - 柔和圆点（带光晕）
+ * TrendChart — 平滑曲线趋势图（还原自 release10 安装包）
+ * - 隐藏坐标轴与网格，仅保留平滑曲线 + 渐变填充 + 柔和圆点
  */
-const GRID = 'rgba(255,255,255,0.055)';
-const TICK = 'rgba(255,255,255,0.34)';
-
-export default function TrendChart({ data, labels, color = '#22C3D6', height = 140, unit = '' }) {
+export default function TrendChart({ data, labels, color = '#22C3D6', height = 96, unit = '' }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
     const el = canvasRef.current;
     if (!el) return;
-    const ctx = el.getContext('2d');
-    const grad = ctx.createLinearGradient(0, 0, 0, height);
+    const grad = el.getContext('2d').createLinearGradient(0, 0, 0, height);
     grad.addColorStop(0, color + '55');
     grad.addColorStop(0.6, color + '1A');
     grad.addColorStop(1, color + '00');
 
-    chartRef.current = new Chart(ctx, {
+    chartRef.current = new Chart(el, {
       type: 'line',
       data: {
         labels: labels || data.map((_, i) => i + 1),
@@ -46,8 +40,8 @@ export default function TrendChart({ data, labels, color = '#22C3D6', height = 1
             fill: true,
             tension: 0.42,
             borderWidth: 2,
-            pointRadius: 3.5,
-            pointHoverRadius: 6,
+            pointRadius: 3,
+            pointHoverRadius: 5,
             pointBackgroundColor: '#121214',
             pointBorderColor: color,
             pointBorderWidth: 2,
@@ -79,38 +73,14 @@ export default function TrendChart({ data, labels, color = '#22C3D6', height = 1
           },
         },
         scales: {
-          x: {
-            display: true,
-            grid: { display: true, color: GRID, drawTicks: false, lineWidth: 1 },
-            border: { display: false },
-            ticks: {
-              color: TICK,
-              font: { size: 10 },
-              maxRotation: 0,
-              autoSkip: true,
-              maxTicksLimit: 7,
-              padding: 6,
-            },
-          },
-          y: {
-            display: true,
-            grid: { display: true, color: GRID, drawTicks: false, lineWidth: 1 },
-            border: { display: false },
-            beginAtZero: true,
-            ticks: {
-              color: TICK,
-              font: { size: 9 },
-              maxTicksLimit: 5,
-              padding: 4,
-            },
-          },
+          x: { display: false, grid: { display: false }, border: { display: false } },
+          y: { display: false, grid: { display: false }, border: { display: false } },
         },
       },
     });
 
     return () => { chartRef.current?.destroy(); chartRef.current = null; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, color, height, labels]);
+  }, [data, color, height]);
 
   return (
     <div style={{ height, width: '100%', position: 'relative' }}>

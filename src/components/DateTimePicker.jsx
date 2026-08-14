@@ -31,45 +31,29 @@ function daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
 
 /** 滚轮列（复用 TimeWheelPicker 的质感） */
 function WheelColumn({ values, index, onChange, isPad = false, narrow = false }) {
-  const rowH = 42;
+  const rowH = 40;
   const visible = 5;
   const center = 2;
   const accumRef = useRef(0);
-  const colRef = useRef(null);
-  // 用 ref 保存最新值，避免每次渲染都重建监听器
-  const indexRef = useRef(index);
-  const onChangeRef = useRef(onChange);
-  const valuesRef = useRef(values);
-  indexRef.current = index;
-  onChangeRef.current = onChange;
-  valuesRef.current = values;
 
-  // 原生 wheel 监听（passive:false），保证 preventDefault 生效、滚轮可滚动
-  useEffect(() => {
-    const el = colRef.current;
-    if (!el) return;
-    const onWheel = (e) => {
-      e.preventDefault();
-      accumRef.current += e.deltaY;
-      const step = Math.round(accumRef.current / 48);
-      if (step !== 0) {
-        accumRef.current = 0;
-        const vals = valuesRef.current;
-        const next = Math.max(0, Math.min(vals.length - 1, indexRef.current + step));
-        if (next !== indexRef.current) onChangeRef.current(next);
-      }
-    };
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, []);
+  const handleWheel = (e) => {
+    e.preventDefault();
+    accumRef.current += e.deltaY;
+    const step = Math.round(accumRef.current / 48);
+    if (step !== 0) {
+      accumRef.current = 0;
+      const next = Math.max(0, Math.min(values.length - 1, index + step));
+      if (next !== index) onChange(next);
+    }
+  };
 
   const width = narrow ? 46 : 58;
 
   return (
     <div
-      ref={colRef}
       className="relative select-none overflow-hidden"
-      style={{ height: rowH * visible, width, touchAction: 'none' }}
+      style={{ height: rowH * visible, width }}
+      onWheel={handleWheel}
     >
       <div
         style={{
@@ -80,10 +64,9 @@ function WheelColumn({ values, index, onChange, isPad = false, narrow = false })
         {values.map((v, i) => {
           const dist = Math.abs(i - index);
           const isSel = i === index;
-          let blur = 0, opacity = 0.55, fontSize = 13.5, color = 'rgba(255,255,255,0.85)';
-          if (dist === 1) { blur = 0.7; opacity = 0.42; fontSize = 13; color = 'rgba(255,255,255,0.62)'; }
-          if (dist === 2) { blur = 1.6; opacity = 0.26; fontSize = 12.5; color = 'rgba(255,255,255,0.42)'; }
-          if (dist >= 3) { blur = 2.6; opacity = 0.14; fontSize = 12; color = 'rgba(255,255,255,0.30)'; }
+          let blur = 0, opacity = 0.42, fontSize = 13;
+          if (dist === 1) { blur = 0.8; opacity = 0.55; fontSize = 13.5; }
+          if (dist === 2) { blur = 1.8; opacity = 0.28; fontSize = 12.5; }
           return (
             <div
               key={i}
@@ -93,14 +76,14 @@ function WheelColumn({ values, index, onChange, isPad = false, narrow = false })
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: isSel ? 19 : fontSize,
+                fontSize: isSel ? 18 : fontSize,
                 fontWeight: isSel ? 700 : 400,
-                color: isSel ? '#F0FDFF' : color,
-                opacity: isSel ? 1 : opacity,
+                color: isSel ? '#F2FEFF' : '#FFFFFF',
+                opacity,
                 filter: `blur(${blur}px)`,
                 fontVariantNumeric: 'tabular-nums',
                 cursor: 'pointer',
-                textShadow: isSel ? '0 0 10px rgba(34,195,214,0.55)' : 'none',
+                textShadow: isSel ? `0 0 8px rgba(34,195,214,0.45)` : 'none',
                 transition: 'all 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)',
               }}
             >
@@ -109,24 +92,23 @@ function WheelColumn({ values, index, onChange, isPad = false, narrow = false })
           );
         })}
       </div>
-      {/* 选中高亮条（青色渐变） */}
       <div
         className="pointer-events-none absolute left-0 right-0"
         style={{
           top: center * rowH,
           height: rowH,
-          background: 'linear-gradient(180deg, rgba(34,195,214,0.20), rgba(34,195,214,0.08))',
-          borderRadius: 12,
-          borderTop: '1px solid rgba(34,195,214,0.42)',
-          borderBottom: '1px solid rgba(34,195,214,0.42)',
-          boxShadow: 'inset 0 0 20px -6px rgba(34,195,214,0.5), 0 0 14px -4px rgba(34,195,214,0.35)',
+          background: 'rgba(34,195,214,0.07)',
+          borderRadius: 10,
+          borderTop: `1px solid rgba(34,195,214,0.30)`,
+          borderBottom: `1px solid rgba(34,195,214,0.30)`,
+          boxShadow: 'inset 0 0 18px -6px rgba(34,195,214,0.35)',
         }}
       />
       <button
         type="button"
         onClick={() => onChange(Math.max(0, index - 1))}
         className="absolute left-0 right-0 flex items-center justify-center text-white/25 hover:text-cyan-300 transition-colors"
-        style={{ top: 0, height: rowH - 12, background: 'transparent' }}
+        style={{ top: 0, height: rowH - 10, background: 'transparent' }}
         tabIndex={-1}
       >
         <ChevronUp className="h-3.5 w-3.5" strokeWidth={2} />
@@ -135,7 +117,7 @@ function WheelColumn({ values, index, onChange, isPad = false, narrow = false })
         type="button"
         onClick={() => onChange(Math.min(values.length - 1, index + 1))}
         className="absolute left-0 right-0 flex items-center justify-center text-white/25 hover:text-cyan-300 transition-colors"
-        style={{ bottom: 0, height: rowH - 12, background: 'transparent' }}
+        style={{ bottom: 0, height: rowH - 10, background: 'transparent' }}
         tabIndex={-1}
       >
         <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />
@@ -172,7 +154,7 @@ export default function DateTimePicker({ value, onChange, mode = 'datetime', wid
     setDraft(parseValue(value, mode));
     const cols = isDate ? 3 : 5;
     const estW = cols * 58 + 40;
-    const estH = 5 * 42 + 62;
+    const estH = 5 * 40 + 62;
     setPos({
       left: Math.max(8, r.right - estW),
       top: Math.max(8, r.top - estH - 8),
