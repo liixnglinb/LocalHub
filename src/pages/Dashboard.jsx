@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, FolderKanban, ArrowRight } from 'lucide-react';
+import { LogOut, FolderKanban, ArrowRight, KeyRound } from 'lucide-react';
 import {
   NotebookPen, Link, Lightbulb, BookOpen, Baby, Share2, Trophy, Globe,
   Wrench, CalendarDays, CalendarClock, Bot, Newspaper,
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 /* ============================================================
    首页 Dashboard · 经典简约商务白底风
@@ -31,8 +32,22 @@ const TOOLS = [
 
 export default function Dashboard({ onLogout, user }) {
   const navigate = useNavigate();
+  const [pwdNote, setPwdNote] = useState('');
   const displayName = user?.displayName || user?.email?.split('@')[0] || '用户';
   const avatarUrl = user?.avatarUrl || null;
+
+  // 设置密码：直接调用 Supabase updateUser（需登录态）
+  const handleSetPassword = async () => {
+    setPwdNote('');
+    const p1 = window.prompt('请输入新密码（至少 6 位）：');
+    if (!p1) return;
+    if (p1.length < 6) { setPwdNote('密码至少 6 位'); return; }
+    const p2 = window.prompt('请再次输入新密码确认：');
+    if (p1 !== p2) { setPwdNote('两次输入的密码不一致'); return; }
+    const { error } = await supabase.auth.updateUser({ password: p1 });
+    setPwdNote(error ? ('设置失败：' + error.message) : '密码已设置，下次可用邮箱密码登录');
+    setTimeout(() => setPwdNote(''), 5000);
+  };
 
   return (
     <div className="home-wrap">
@@ -57,6 +72,11 @@ export default function Dashboard({ onLogout, user }) {
               <span className="user-avatar user-avatar-fallback">{displayName.charAt(0).toUpperCase()}</span>
             )}
             <span className="user-name">{displayName}</span>
+            <button onClick={handleSetPassword} title="设置密码" className="logout-btn">
+              <KeyRound size={14} strokeWidth={1.8} />
+              <span>设密码</span>
+            </button>
+            {pwdNote && <span style={{ fontSize: 12, color: '#0CA678' }}>{pwdNote}</span>}
             {onLogout && (
               <button onClick={onLogout} title="退出登录" className="logout-btn">
                 <LogOut size={14} strokeWidth={1.8} />
