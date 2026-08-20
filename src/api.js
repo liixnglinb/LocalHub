@@ -1,24 +1,32 @@
 /* ============================================================
-   LocalHub 云端前端 · API 层（Supabase 匿名版）
-   个人自用：无登录，数据存 Supabase tool_data 表（key → jsonb）。
+   LocalHub 云端前端 · API 层（Supabase 登录版）
+   数据读写走 Supabase user_data 表（按用户隔离，RLS 保证仅本人可见）。
    接口签名与原 electronAPI 保持一致，页面代码无需改动。
    ============================================================ */
 import { supabase } from './lib/supabase';
 
 // ============ 数据读写（saveData / loadData / deleteData） ============
-// 存到 tool_data：(key, value jsonb)，匿名公开读写（个人自用场景）。
+async function requireUid() {
+  const { data } = await supabase.auth.getSession();
+  if (!data?.session?.user?.id) throw new Error('未登录');
+  return data.session.user.id;
+}
+
 export async function saveData(key, value) {
+  const uid = await requireUid();
   const { error } = await supabase
-    .from('tool_data')
-    .upsert({ key, value }, { onConflict: 'key' });
+    .from('user_data')
+    .upsert({ user_id: uid, key, value }, { onConflict: 'user_id,key' });
   if (error) throw new Error(error.message);
   return { ok: true };
 }
 
 export async function loadData(key) {
+  const uid = await requireUid();
   const { data, error } = await supabase
-    .from('tool_data')
+    .from('user_data')
     .select('value')
+    .eq('user_id', uid)
     .eq('key', key)
     .maybeSingle();
   if (error) throw new Error(error.message);
@@ -26,9 +34,11 @@ export async function loadData(key) {
 }
 
 export async function deleteData(key) {
+  const uid = await requireUid();
   const { error } = await supabase
-    .from('tool_data')
+    .from('user_data')
     .delete()
+    .eq('user_id', uid)
     .eq('key', key);
   if (error) throw new Error(error.message);
   return { ok: true };
