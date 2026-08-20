@@ -1,0 +1,288 @@
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Calendar, Clock, ChevronUp, ChevronDown } from 'lucide-react';
+
+/**
+ * DateTimePicker — 自定义滚轮式日期时间选择器（LocalHub 深色玻璃拟态版）
+ * - mode: 'datetime' | 'date' （date 模式只选年月日，datetime 增强时分）
+ * - 触发按钮：图标 + 深黑底白字，等宽数字
+ * - 下拉面板：纯黑背景 + 深灰边框 + 青色环境光晕
+ * - 年/月/日/时/分 多列滚轮：未选中轻微运动模糊，当前选中电光蓝高亮 + 发光
+ */
+const ELEC_BLUE = '#22C3D6';
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+/** 解析 value（YYYY-MM-DD 或 YYYY-MM-DDTHH:MM）到 {y,m,d,h,min} */
+function parseValue(v, mode) {
+  const str = String(v || '');
+  const dt = new Date(str);
+  const hasDate = !isNaN(dt.getTime());
+  const base = hasDate ? dt : new Date();
+  return {
+    y: base.getFullYear(),
+    m: base.getMonth() + 1,
+    d: base.getDate(),
+    h: base.getHours(),
+    min: base.getMinutes(),
+  };
+}
+
+function daysInMonth(y, m) { return new Date(y, m, 0).getDate(); }
+
+/** 滚轮列（复用 TimeWheelPicker 的质感） */
+function WheelColumn({ values, index, onChange, pad = false, narrow = false }) {
+  const rowH = 40;
+  const visible = 5;
+  const center = 2;
+  const accumRef = useRef(0);
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    accumRef.current += e.deltaY;
+    const step = Math.round(accumRef.current / 48);
+    if (step !== 0) {
+      accumRef.current = 0;
+      const next = Math.max(0, Math.min(values.length - 1, index + step));
+      if (next !== index) onChange(next);
+    }
+  };
+
+  const width = narrow ? 46 : 58;
+
+  return (
+    <div
+      className="relative select-none overflow-hidden"
+      style={{ height: rowH * visible, width }}
+      onWheel={handleWheel}
+    >
+      <div
+        style={{
+          transform: `translateY(${center * rowH - index * rowH}px)`,
+          transition: 'transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)',
+        }}
+      >
+        {values.map((v, i) => {
+          const dist = Math.abs(i - index);
+          const isSel = i === index;
+          let blur = 0, opacity = 0.42, fontSize = 13;
+          if (dist === 1) { blur = 0.8; opacity = 0.55; fontSize = 13.5; }
+          if (dist === 2) { blur = 1.8; opacity = 0.28; fontSize = 12.5; }
+          return (
+            <div
+              key={i}
+              onClick={() => onChange(i)}
+              style={{
+                height: rowH,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: isSel ? 18 : fontSize,
+                fontWeight: isSel ? 700 : 400,
+                color: isSel ? '#F2FEFF' : '#FFFFFF',
+                opacity,
+                filter: `blur(${blur}px)`,
+                fontVariantNumeric: 'tabular-nums',
+                cursor: 'pointer',
+                textShadow: isSel ? `0 0 8px rgba(34,195,214,0.45)` : 'none',
+                transition: 'all 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)',
+              }}
+            >
+              {pad ? pad(v) : String(v)}
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="pointer-events-none absolute left-0 right-0"
+        style={{
+          top: center * rowH,
+          height: rowH,
+          background: 'rgba(34,195,214,0.07)',
+          borderRadius: 10,
+          borderTop: `1px solid rgba(34,195,214,0.30)`,
+          borderBottom: `1px solid rgba(34,195,214,0.30)`,
+          boxShadow: 'inset 0 0 18px -6px rgba(34,195,214,0.35)',
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(0, index - 1))}
+        className="absolute left-0 right-0 flex items-center justify-center text-white/25 hover:text-cyan-300 transition-colors"
+        style={{ top: 0, height: rowH - 10, background: 'transparent' }}
+        tabIndex={-1}
+      >
+        <ChevronUp className="h-3.5 w-3.5" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(values.length - 1, index + 1))}
+        className="absolute left-0 right-0 flex items-center justify-center text-white/25 hover:text-cyan-300 transition-colors"
+        style={{ bottom: 0, height: rowH - 10, background: 'transparent' }}
+        tabIndex={-1}
+      >
+        <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />
+      </button>
+    </div>
+  );
+}
+
+export default function DateTimePicker({ value, onChange, mode = 'datetime', width = '100%' }) {
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
+  const [draft, setDraft] = useState(() => parseValue(value, mode));
+  const wrapRef = useRef(null);
+  const popupRef = useRef(null);
+
+  const isDate = mode === 'date';
+
+  // 年月可用范围
+  const years = useMemo(() => {
+    const now = new Date().getFullYear();
+    const arr = [];
+    for (let y = now - 2; y <= now + 2; y++) arr.push(y);
+    return arr;
+  }, []);
+  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
+  const days = useMemo(() => Array.from({ length: daysInMonth(draft.y, draft.m) }, (_, i) => i + 1), [draft.y, draft.m]);
+  const hours = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
+  const minutes = useMemo(() => Array.from({ length: 60 }, (_, i) => i), []);
+
+  const openMenu = () => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setDraft(parseValue(value, mode));
+    const cols = isDate ? 3 : 5;
+    const estW = cols * 58 + 40;
+    const estH = 5 * 40 + 62;
+    setPos({
+      left: Math.max(8, r.right - estW),
+      top: Math.max(8, r.top - estH - 8),
+      width: estW,
+    });
+    setOpen(true);
+  };
+
+  const commit = () => {
+    const y = draft.y, m = pad(draft.m), d = pad(draft.d);
+    const base = isDate ? `${y}-${m}-${d}` : `${y}-${m}-${d}T${pad(draft.h)}:${pad(draft.min)}`;
+    onChange?.(base);
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => {
+      if (popupRef.current?.contains(e.target)) return;
+      if (wrapRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const cur = parseValue(value, mode);
+  const display = isDate
+    ? `${cur.y}-${pad(cur.m)}-${pad(cur.d)}`
+    : `${cur.m}/${cur.d} ${pad(cur.h)}:${pad(cur.min)}`;
+
+  const yIdx = Math.max(0, years.indexOf(cur.y));
+  const mIdx = cur.m - 1;
+  const dIdx = Math.min(days.length - 1, cur.d - 1);
+
+  return (
+    <div ref={wrapRef} className="relative inline-block" style={{ width }}>
+      <button
+        type="button"
+        onClick={() => (open ? setOpen(false) : openMenu())}
+        className="flex items-center justify-between gap-2 px-3 py-2 text-[14px] text-white/90 transition-all"
+        style={{
+          background: 'rgba(10,10,12,0.9)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 10,
+          fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '0.04em',
+          cursor: 'pointer',
+          width: '100%',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 2px 10px -4px rgba(0,0,0,0.6)',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(34,195,214,0.45)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; }}
+      >
+        <span className="truncate">{display}</span>
+        {isDate
+          ? <Calendar className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} style={{ color: ELEC_BLUE }} />
+          : <Clock className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} style={{ color: ELEC_BLUE }} />}
+      </button>
+
+      {open && pos && (
+        <div
+          ref={popupRef}
+          style={{
+            position: 'fixed',
+            left: pos.left,
+            top: pos.top,
+            width: pos.width,
+            background: 'rgba(16,16,18,0.96)',
+            backdropFilter: 'blur(20px) saturate(120%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(120%)',
+            borderRadius: 16,
+            border: '1px solid rgba(255,255,255,0.14)',
+            boxShadow:
+              '0 18px 42px rgba(0,0,0,0.60), 0 2px 8px -2px rgba(0,0,0,0.50), 0 0 26px -8px rgba(34,195,214,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+            zIndex: 9999,
+            padding: '14px 14px 10px',
+          }}
+          className="animate-scale-in"
+        >
+          <div className="mb-2 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-[0.22em] font-semibold" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            {isDate
+              ? <><Calendar className="h-3 w-3" style={{ color: ELEC_BLUE }} strokeWidth={1.8} />选择日期</>
+              : <><Clock className="h-3 w-3" style={{ color: ELEC_BLUE }} strokeWidth={1.8} />选择日期与时间</>}
+          </div>
+
+          <div className="flex items-center justify-center">
+            <WheelColumn values={years} index={yIdx} onChange={(i) => setDraft(d => ({ ...d, y: years[i] }))} />
+            <span className="text-[15px] font-semibold mx-0.5" style={{ color: 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>/</span>
+            <WheelColumn values={months} index={mIdx} onChange={(i) => setDraft(d => ({ ...d, m: i + 1 }))} pad narrow />
+            <span className="text-[15px] font-semibold mx-0.5" style={{ color: 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>/</span>
+            <WheelColumn values={days} index={dIdx} onChange={(i) => setDraft(d => ({ ...d, d: days[i] }))} pad narrow />
+
+            {!isDate && (
+              <>
+                <span className="text-[15px] font-semibold mx-1" style={{ color: 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>·</span>
+                <WheelColumn values={hours} index={draft.h} onChange={(i) => setDraft(d => ({ ...d, h: i }))} pad narrow />
+                <span className="text-[15px] font-semibold mx-0.5" style={{ color: 'rgba(255,255,255,0.3)', fontVariantNumeric: 'tabular-nums' }}>:</span>
+                <WheelColumn values={minutes} index={draft.min} onChange={(i) => setDraft(d => ({ ...d, min: i }))} pad narrow />
+              </>
+            )}
+          </div>
+
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex-1 py-1.5 rounded-[8px] text-[12px] text-white/55 hover:text-white transition-colors"
+              style={{ background: 'rgba(255,255,255,0.06)' }}
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              onClick={commit}
+              className="flex-1 py-1.5 rounded-[8px] text-[12px] font-medium text-black transition-colors"
+              style={{ background: '#F1F1F2' }}
+            >
+              确定
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

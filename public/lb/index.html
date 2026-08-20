@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI 大模型综合能力排行榜</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 页面主壳 -->
+  <div class="app">
+
+    <!-- 顶部导航栏 -->
+    <header class="page-header">
+      <div class="header-top">
+        <!-- 左上角品牌 -->
+        <div class="brand">
+          <span class="brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/>
+            </svg>
+          </span>
+          <div class="brand-text">
+            <div class="brand-name">AI 大模型综合能力排行榜</div>
+            <div class="brand-sub">Global LLM Leaderboard · 2026.08</div>
+          </div>
+        </div>
+
+        <!-- 右上工具区 -->
+        <div class="toolbar">
+          <!-- 搜索框 -->
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+            </svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="搜索模型 / 厂商" autocomplete="off" />
+          </div>
+
+          <!-- 刷新按钮 -->
+          <button class="refresh-btn" id="refreshBtn" type="button" title="实时刷新">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-10.6L1 10"/>
+            </svg>
+          </button>
+
+          <!-- 从 BenchLM 同步 -->
+          <button class="theme-btn sync-btn" id="syncBtn" type="button" title="从 BenchLM 自动获取最新数据">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <path d="m7 10 5 5 5-5"/>
+              <path d="M12 15V3"/>
+            </svg>
+            <span>同步数据</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 栏 -->
+      <div class="tabs" id="tabs" role="tablist"></div>
+    </header>
+
+    <!-- 榜单主体 -->
+    <main class="page-main">
+      <!-- 结果统计 -->
+      <div class="summary-row">
+        <div class="summary-left" id="summaryLeft">加载中…</div>
+        <div class="summary-right" id="summaryRight"></div>
+      </div>
+
+      <!-- 榜单表格 -->
+      <div class="leaderboard">
+        <div class="rows" id="rows"></div>
+
+        <!-- 底部横轴刻度 -->
+        <div class="axis" id="axis"></div>
+      </div>
+
+      <div class="footnote" id="footnote"></div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

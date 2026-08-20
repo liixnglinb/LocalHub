@@ -1,0 +1,15 @@
+# dependencies
+node_modules
+
+# build output
+dist
+dist-ssr
+
+# 本地环境变量（含可能误填的密钥，不提交）
+.env
+.env.local
+*.local
+
+# logs / editor
+*.log
+.DS_Store

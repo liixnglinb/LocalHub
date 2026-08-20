@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- LocalHub v14：仅最外侧白底四角圆角（rx=70），内部黑色图形保持直角 -->
+  <rect x="0" y="0" width="512" height="512" rx="70" ry="70" fill="#ffffff"/>
+  <path d="M120 120 L392 120 L392 240 L260 240 L260 392 L120 392 Z" fill="#000000"/>
+  <rect x="280" y="260" width="112" height="112" fill="#000000"/>
+</svg>
