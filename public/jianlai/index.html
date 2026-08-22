@@ -29,6 +29,7 @@ body{font-family:'STKaiti','KaiTi','楷体','SimSun',serif;background:var(--ink-
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn 0.5s ease}
 @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes musicSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .game-screen{display:none}.game-header{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink-gray);margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .main-content{display:grid;grid-template-columns:1fr 260px;gap:12px}@media(max-width:700px){.main-content{grid-template-columns:1fr}}
@@ -46,7 +47,7 @@ body{font-family:'STKaiti','KaiTi','楷体','SimSun',serif;background:var(--ink-
 .battle-screen{display:none}.battle-arena{background:rgba(15,15,15,0.8);border:1px solid var(--ink-gray);padding:12px;margin-bottom:8px;min-height:130px}.battle-entity{display:flex;align-items:center;gap:8px;margin-bottom:6px}.battle-actions{display:flex;flex-wrap:wrap;gap:5px}
 .log-box{background:rgba(10,10,10,0.6);border:1px solid var(--ink-gray);padding:8px;max-height:100px;overflow-y:auto;font-size:0.8rem;line-height:1.6;color:var(--ink-light)}.log-entry{margin-bottom:2px}.log-entry.combat{color:var(--ink-red)}.log-entry.gain{color:var(--ink-green)}.log-entry.loss{color:var(--ink-gold)}.log-entry.escape{color:var(--ink-blue)}
 .audio-controls{position:fixed;top:10px;right:10px;display:flex;gap:6px;z-index:50}
-.audio-btn{background:rgba(20,20,20,0.8);border:1px solid var(--ink-gray);color:var(--ink-light);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s}.audio-btn:hover{border-color:var(--ink-paper)}
+.audio-btn{background:rgba(20,20,20,0.8);border:1px solid var(--ink-gray);color:var(--ink-light);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s}.audio-btn:hover{border-color:var(--ink-paper)}.audio-btn.music-playing{animation:musicSpin 1.8s linear infinite}.audio-btn.music-playing:active{animation-play-state:paused}
 /* 通知系统 */
 #toast-container{position:fixed;top:50px;right:50%;transform:translateX(50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
 .toast{background:rgba(30,30,30,0.95);border:1px solid var(--ink-gray);padding:10px 20px;font-size:0.9rem;animation:toastIn 0.3s ease,toastOut 0.3s ease 2.7s;max-width:400px;text-align:center;box-shadow:0 0 20px rgba(0,0,0,0.5)}
@@ -81,7 +82,7 @@ body{font-family:'STKaiti','KaiTi','楷体','SimSun',serif;background:var(--ink-
 </style>
 </head>
 <body>
-<div class="bg-layer" id="bg-layer" style="background-image:url('img/start.jpg')"></div>
+<div class="bg-layer" id="bg-layer" style="background-image:url('images/title.jpg')"></div>
 <div class="bg-overlay"></div>
 <div class="mist"></div>
 <div id="toast-container"></div>
@@ -239,8 +240,8 @@ body{font-family:'STKaiti','KaiTi','楷体','SimSun',serif;background:var(--ink-
 let gameState = null, selectedMode = 'free', selectedBackground = 'poor', selectedPath = 'sword';
 
 function selectMode(m) { selectedMode=m; document.querySelectorAll('#mode-free,#mode-story').forEach(c=>c.classList.remove('selected')); document.getElementById('mode-'+m).classList.add('selected'); document.getElementById('free-options').style.display=m==='free'?'block':'none'; document.getElementById('story-options').style.display=m==='story'?'block':'none'; AudioEngine.playClick(); }
-function selectBackground(b) { selectedBackground=b; ['poor','scholar','merchant','martial'].forEach(b=>document.getElementById('bg-'+b).classList.toggle('selected',b===b)); AudioEngine.playClick(); }
-function selectPath(p) { selectedPath=p; ['sword','qi','body'].forEach(p=>document.getElementById('path-'+p).classList.toggle('selected',p===p)); AudioEngine.playClick(); }
+function selectBackground(background) { selectedBackground=background; ['poor','scholar','merchant','martial'].forEach(option=>document.getElementById('bg-'+option).classList.toggle('selected',option===background)); AudioEngine.playClick(); }
+function selectPath(path) { selectedPath=path; ['sword','qi','body'].forEach(option=>document.getElementById('path-'+option).classList.toggle('selected',option===path)); AudioEngine.playClick(); }
 
 function showCharacterSelect() { AudioEngine.init();AudioEngine.resume();AudioEngine.playClick(); document.getElementById('title-screen').style.display='none'; document.getElementById('character-select').style.display='block'; }
 function showAbout() { AudioEngine.playClick(); showPanelHTML('关于','<p style="line-height:1.8">剑来·修仙传 — 水墨国风修仙模拟游戏</p><p style="color:var(--ink-gray);margin-top:10px">根据烽火戏诸侯《剑来》世界观构建</p><p style="color:var(--ink-gray);margin-top:10px;font-size:0.85rem">v2.0 · 完整剧情版</p>'); }
@@ -254,6 +255,7 @@ function startGame() {
   document.getElementById('game-screen').style.display='block';
   Engine.init(gameState);
   AudioEngine.playTheme('town');
+  syncMusicButton();
   updateUI(); showScene();
   toast('踏入修仙路，天地广阔任你行。','event');
 }
@@ -269,7 +271,7 @@ function updateUI() {
   
   const bgMap = {nipingxiang:'nipingxiang.jpg',academy:'academy.jpg',blacksmith:'blacksmith.jpg',pharmacy:'pharmacy.jpg',town_gate:'town_gate.jpg',mountain_temple:'temple.jpg',sword_wall:'swordwall.jpg',lake:'lake.jpg',lotus:'lotus.jpg',barbarian:'barbarian.jpg',shuyang:'shuyang.jpg'};
   const bgFile = bgMap[Engine.state.location];
-  if(bgFile) document.getElementById('bg-layer').style.backgroundImage = "url('img/"+bgFile+"')";
+  if(bgFile) document.getElementById('bg-layer').style.backgroundImage = "url('images/"+bgFile+"')";
   
   const s=gameState.stats;
   document.getElementById('stats-quick').innerHTML = `
@@ -383,13 +385,15 @@ function loadSave(id) {
   document.getElementById('panel-overlay').style.display = 'none';
   Engine.init(gameState);
   AudioEngine.playTheme('town');
+  syncMusicButton();
   updateUI(); showScene();
   toast('存档已读取','gain');
 }
 
 function loadGame() { showLoadPanel(); }
 
-function toggleMusic() { const en=AudioEngine.toggleMusic(); document.getElementById('music-btn').style.opacity=en?1:0.4; }
+function syncMusicButton() { const button=document.getElementById('music-btn'); if(!button) return; const playing=AudioEngine.musicEnabled && AudioEngine.isMusicPlaying; button.style.opacity=AudioEngine.musicEnabled?1:0.4; button.classList.toggle('music-playing',playing); button.setAttribute('aria-pressed',String(!AudioEngine.musicEnabled)); }
+function toggleMusic() { AudioEngine.init(); AudioEngine.resume(); const en=AudioEngine.toggleMusic(); syncMusicButton(); if(en && !AudioEngine.isMusicPlaying) { AudioEngine.playTheme(AudioEngine.currentTheme||'title'); syncMusicButton(); } }
 function toggleSfx() { const en=AudioEngine.toggleSfx(); document.getElementById('sfx-btn').style.opacity=en?1:0.4; }
 
 function travelTo(locId) {
