@@ -1,0 +1,50 @@
+// ============================================================
+// LocalHub 云端 · Prisma Schema（Supabase PostgreSQL）
+// 多用户版：用户表 + 按用户隔离的 KV 数据
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")   // transaction-mode pooler（运行连接）
+  directUrl = env("DIRECT_URL")     // session-mode pooler（迁移用）
+}
+
+// ============ 用户 ============
+model User {
+  id           String    @id @default(cuid())
+  email        String?   @unique // 邮箱登录用户必填
+  passwordHash String?   @map("password_hash")
+  githubId     String?   @unique @map("github_id")
+  githubLogin  String?   @map("github_login")
+  displayName  String?   @map("display_name")
+  avatarUrl    String?   @map("avatar_url")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  kvs    Kv[]
+  @@map("users")
+}
+
+// ============ 通用 KV 数据（按用户隔离） ============
+model Kv {
+  userId    String   @map("user_id")
+  key       String
+  value     String
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, key])
+  @@map("kv")
+}
+
+// 全局配置项（如服务端设置，不含用户数据）
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
