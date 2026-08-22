@@ -1,6 +1,6 @@
 /* ============================================================
    AI 大模型排行榜 · 前端逻辑
-   - 从后端 API 拉取数据：/api/config, /api/leaderboard/:tabId
+   - 从 Supabase Edge Function 拉取数据：/leaderboard?config=1、?tab=xxx
    - 支持 Tab 切换、搜索、思考强度选择、实时刷新、行展开、深浅色切换
    ============================================================ */
 
@@ -18,10 +18,13 @@
   const footnote = document.getElementById("footnote");
 
   // ---- 状态 ----
-  let CONFIG = null;         // 后端返回的配置（tabs、strengths、vendors、axis）
+  let CONFIG = null;         // 接口返回的配置（tabs、strengths、vendors、axis）
   let activeTab = "overall";
   let selectedId = null;     // 当前展开行 id
   let lastList = [];         // 最近一次榜单数据（供同步/刷新后复用）
+
+  // 数据接口：Supabase Edge Function（替代原后端 /api/*，需先部署函数 + 建表）
+  const API_BASE = "https://grutfwvthmrdhywwwlyw.functions.supabase.co/leaderboard";
 
   // 默认深色模式
   document.body.classList.add("dark");
@@ -81,7 +84,7 @@
     });
   });
 
-  // ---- 从 DataLearner 同步数据 ----
+  // ---- 从 BenchLM 同步数据 ----
   const syncBtn = document.getElementById("syncBtn");
   syncBtn.addEventListener("click", async () => {
     const span = syncBtn.querySelector("span");
@@ -91,7 +94,7 @@
     svg.classList.add("spin");
     span.textContent = "同步中…";
     try {
-      const res = await fetch("/api/sync", { method: "POST" });
+      const res = await fetch(API_BASE + "?sync=1", { method: "POST" });
       const j = await res.json();
       if (!res.ok || !j.ok) throw new Error((j && j.error) || "同步失败 " + res.status);
       // 重新拉取配置 + 当前榜单
@@ -118,7 +121,7 @@
   // 数据请求 + 渲染
   // ============================================================
   async function fetchConfig() {
-    const res = await fetch("/api/config");
+    const res = await fetch(API_BASE + "?config=1");
     if (!res.ok) throw new Error("配置接口错误 " + res.status);
     CONFIG = await res.json();
   }
@@ -131,14 +134,14 @@
 
     let payload;
     try {
-      const res = await fetch(`/api/leaderboard/${activeTab}?${params}`);
+      const res = await fetch(`${API_BASE}?tab=${encodeURIComponent(activeTab)}&${params}`);
       if (!res.ok) throw new Error("榜单接口错误 " + res.status);
       payload = await res.json();
     } catch (err) {
       rowsEl.innerHTML = `
         <div class="row" style="grid-template-columns:1fr;">
           <div style="color:#e07b68;padding:40px;text-align:center;">
-            加载失败：${err.message}。请确认后端服务已启动（node server.js）
+            加载失败：${err.message}。请检查网络后重试，或稍后再来看。
           </div>
         </div>`;
       return;
@@ -411,9 +414,9 @@
     } catch (err) {
       rowsEl.innerHTML = `
         <div class="empty-state" style="color:#c00;">
-          <div><b>初始化失败</b>：${escapeHtml(err.message)}</div>
+          <div><b>加载失败</b>：${escapeHtml(err.message)}</div>
           <div style="margin-top:8px;font-size:12px;">
-            请在项目根目录运行 <code>npm install</code>，再运行 <code>npm start</code> 启动后端。
+            请确认已部署 Supabase Edge Function 并完成建表，再刷新重试。
           </div>
         </div>`;
     }

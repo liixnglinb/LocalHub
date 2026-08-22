@@ -19,6 +19,7 @@ const ClassSchedule = lazy(() => import('./pages/ClassSchedule'))
 const Planner = lazy(() => import('./pages/Planner'))
 const AgentSkills = lazy(() => import('./pages/AgentSkills'))
 const AINews = lazy(() => import('./pages/AINews'))
+const Jianlai = lazy(() => import('./pages/Jianlai'))
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
                 <Route path="/planner" element={<Planner />} />
                 <Route path="/agents" element={<AgentSkills />} />
                 <Route path="/news" element={<AINews />} />
+                <Route path="/jianlai" element={<Jianlai />} />
                 {/* 未知路径重定向回首页，避免空白页 */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

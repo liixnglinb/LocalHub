@@ -13,3 +13,29 @@ dist-ssr
 # logs / editor
 *.log
 .DS_Store
+
+# local env
+.env
+.env.local
+*.local
+
+# old desktop-app artifacts (not part of web/main)
+build
+data
+dev
+electron
+scripts
+screenshots
+release
+release-v2
+release10
+release2
+release3
+release4
+release5
+release6
+release7
+release8
+release9
+dist-verify
+vite.config.js.timestamp-*

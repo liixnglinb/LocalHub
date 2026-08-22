@@ -12,7 +12,7 @@ import {
  *    无渐变 / 无光晕 / 无玻璃 / 无弹跳动画
  */
 
-const FULLSCREEN_PATHS = ['/', '/mindmap', '/leaderboard', '/blog', '/baby-care'];
+const FULLSCREEN_PATHS = ['/', '/mindmap', '/leaderboard', '/blog', '/baby-care', '/jianlai'];
 
 const TOOL_META = {
   '/smart-notes': {
