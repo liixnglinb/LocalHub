@@ -91,6 +91,20 @@ export async function signInWithGitHub() {
   if (error) throw new Error(error.message);
 }
 
+// ---------- 更新资料 / 密码 ----------
+export async function updateProfile(meta) {
+  // meta: { name?, avatar_url? }
+  const { data, error } = await supabase.auth.updateUser({ data: meta });
+  if (error) throw new Error(error.message);
+  return { user: mapUser(data.user) };
+}
+
+export async function changePassword(newPassword) {
+  const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw new Error(error.message);
+  return { user: mapUser(data.user) };
+}
+
 // ---------- 退出 / 清理 ----------
 export async function logout() {
   await supabase.auth.signOut();
@@ -117,5 +131,6 @@ export default {
   getSession, onAuthStateChange, getToken, getUser, isLoggedIn,
   login, register, resetPassword, sendCode, loginWithCode,
   signInWithGitHub, logout, clearToken, checkInit, fetchMe,
+  updateProfile, changePassword,
   completeGitHubLogin, subscribeAuth,
 };

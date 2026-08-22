@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  NotebookPen, Link, Lightbulb, BookOpen, Baby, KeyRound, Wrench, CalendarDays, CalendarClock, Bot, Newspaper,
+  NotebookPen, Link, Lightbulb, BookOpen, Baby, KeyRound, Wrench, CalendarDays, CalendarClock, Bot, Newspaper, UserRound,
 } from 'lucide-react';
 
 /**
@@ -47,6 +47,9 @@ const TOOL_META = {
   },
   '/news': {
     label: 'AI 每日情报站', sub: 'Agent · 模型 · 工具 · 行业 · Skill 一站式速览', Icon: Newspaper, accent: '#3B5BFF',
+  },
+  '/profile': {
+    label: '个人中心', sub: '账号信息 · 修改昵称密码', Icon: UserRound, accent: '#7C5CFF',
   },
 };
 

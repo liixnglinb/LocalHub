@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import ErrorBoundary from './components/ErrorBoundary'
 import AuthGate from './components/AuthGate'
 import Dashboard from './pages/Dashboard'
+import Profile from './pages/Profile'
 
 const ApiKeys = lazy(() => import('./pages/ApiKeys'))
 const WebLinks = lazy(() => import('./pages/WebLinks'))
@@ -36,6 +37,7 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Dashboard onLogout={onLogout} user={user} />} />
+                <Route path="/profile" element={<Profile user={user} onLogout={onLogout} />} />
                 <Route path="/api-keys" element={<ApiKeys />} />
                 <Route path="/web-links" element={<WebLinks />} />
                 <Route path="/mindmap" element={<MindMap />} />
