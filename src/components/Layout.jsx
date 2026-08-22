@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import {
-  NotebookPen, Link, Lightbulb, BookOpen, Baby, KeyRound, Wrench, CalendarDays, CalendarClock, Bot, Newspaper, UserRound, Boxes,
+  NotebookPen, Link, Lightbulb, BookOpen, Baby, KeyRound, Wrench, CalendarDays, CalendarClock, Bot, Newspaper, UserRound,
 } from 'lucide-react';
 
 /**
@@ -50,9 +50,6 @@ const TOOL_META = {
   },
   '/profile': {
     label: '个人中心', sub: '账号信息 · 修改昵称密码', Icon: UserRound, accent: '#7C5CFF',
-  },
-  '/openrouter': {
-    label: 'OpenRouter 免费模型', sub: '可免费调用的大模型实时速览 · 每日两次更新', Icon: Boxes, accent: '#7C5CFF',
   },
 };
 
