@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  subscribeAuth, getSession, login, register, resetPassword,
+  subscribeAuth, getSession, login, register, resendConfirmation, resetPassword,
   sendCode, loginWithCode, signInWithGitHub, logout,
 } from '../auth';
 import {
@@ -112,6 +112,16 @@ export default function AuthGate({ children }) {
 
   const regErrText = (ex) => ex.message || '注册失败，请稍后再试';
 
+  const handleResendConfirmation = async () => {
+    if (!validateEmail()) return;
+    setBusy(true);
+    setErr(''); setMsg('');
+    try {
+      await resendConfirmation(email);
+      setMsg('新的验证邮件已发送，请在手机上打开最新邮件');
+    } catch (ex) { setErr(ex.message || '发送失败'); }
+    finally { setBusy(false); }
+  };
   const handleForget = async () => {
     setErr(''); setMsg('');
     if (!validateEmail()) return;
@@ -224,6 +234,8 @@ export default function AuthGate({ children }) {
 
           .sx-error { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 8px; background: #FDF1F1; border: 1px solid #FBC6C6; color: #DC2626; font: 500 12.5px/1.4 "PingFang SC", system-ui, sans-serif; }
           .sx-msg { display: flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 8px; background: #EFFAF4; border: 1px solid #C6F0DA; color: #16A34A; font: 500 12.5px/1.4 "PingFang SC", system-ui, sans-serif; }
+          .sx-resend { appearance: none; border: 0; background: none; padding: 0; color: #2563EB; font: 500 12px/1.4 "PingFang SC", system-ui, sans-serif; cursor: pointer; text-align: left; }
+          .sx-resend:disabled { opacity: .55; cursor: not-allowed; }
 
           .sx-submit {
             width: 100%; height: 42px; margin-top: 2px;
@@ -326,6 +338,9 @@ export default function AuthGate({ children }) {
             </>)}
 
             {err && <div className="sx-error"><ShieldCheck size={14} strokeWidth={1.8} /><span>{err}</span></div>}
+            {mode === 'login' && tab === 'password' && /尚未验证/.test(err) && email && (
+              <button type="button" className="sx-resend" onClick={handleResendConfirmation} disabled={busy}>重新发送验证邮件</button>
+            )}
             {msg && <div className="sx-msg"><ShieldCheck size={14} strokeWidth={1.8} /><span>{msg}</span></div>}
 
             {mode === 'register' ? (

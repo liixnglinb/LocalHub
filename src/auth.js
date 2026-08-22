@@ -103,6 +103,16 @@ export async function register(email, password) {
   return { user: mapUser(data.user) };
 }
 
+export async function resendConfirmation(email) {
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: getAuthRedirectUrl() },
+  });
+  if (error) throw new Error(authErrorMessage(error));
+  return { ok: true };
+}
+
 export async function resetPassword(email) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: getAuthRedirectUrl(),
@@ -176,7 +186,7 @@ export function subscribeAuth(cb) {
 
 export default {
   getSession, onAuthStateChange, getToken, getUser, isLoggedIn,
-  login, register, resetPassword, sendCode, loginWithCode,
+  login, register, resendConfirmation, resetPassword, sendCode, loginWithCode,
   signInWithGitHub, logout, clearToken, checkInit, fetchMe,
   updateProfile, changePassword,
   completeGitHubLogin, subscribeAuth, authErrorMessage,
