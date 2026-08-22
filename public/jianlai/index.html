@@ -81,7 +81,7 @@ body{font-family:'STKaiti','KaiTi','楷体','SimSun',serif;background:var(--ink-
 </style>
 </head>
 <body>
-<div class="bg-layer" id="bg-layer" style="background-image:url('images/title.jpg')"></div>
+<div class="bg-layer" id="bg-layer" style="background-image:url('img/start.jpg')"></div>
 <div class="bg-overlay"></div>
 <div class="mist"></div>
 <div id="toast-container"></div>
@@ -269,7 +269,7 @@ function updateUI() {
   
   const bgMap = {nipingxiang:'nipingxiang.jpg',academy:'academy.jpg',blacksmith:'blacksmith.jpg',pharmacy:'pharmacy.jpg',town_gate:'town_gate.jpg',mountain_temple:'temple.jpg',sword_wall:'swordwall.jpg',lake:'lake.jpg',lotus:'lotus.jpg',barbarian:'barbarian.jpg',shuyang:'shuyang.jpg'};
   const bgFile = bgMap[Engine.state.location];
-  if(bgFile) document.getElementById('bg-layer').style.backgroundImage = "url('images/"+bgFile+"')";
+  if(bgFile) document.getElementById('bg-layer').style.backgroundImage = "url('img/"+bgFile+"')";
   
   const s=gameState.stats;
   document.getElementById('stats-quick').innerHTML = `

@@ -248,7 +248,7 @@ const STORY_EVENTS = {
       special:{daoHeart:5,swordIntent:3}},
     {id:'v1e10',step:10,title:'少年出山',location:'nipingxiang',
       narration:'小镇的格局已经变了。骊珠洞天坠地，化为骊珠福地。\n陈平安背着行囊，走出泥瓶巷。\n他要护送李宝瓶去山崖书院，也要去寻找自己的路。\n身后，小镇的炊烟袅袅升起。前方，天地广阔，万物生长。\n他回头看了一眼——泥瓶巷的青砖黑瓦，学塾的方向，似乎还能听见齐先生的声音——\n"遇事不决，可问春风。"',
-      dialogues:[{speaker:'旁白',content:'少年转过身，大步向前。春风拂过他的衣角。']}],
+      dialogues:[{speaker:'旁白',content:'少年转过身，大步向前。春风拂过他的衣角。'}],
       choices:[{text:'踏上征程',hint:'前往山崖书院',risk:''},{text:'先去剑气长城',hint:'找宁姚',risk:'路远'},{text:'自由闯荡',hint:'天地之大任我行',risk:''}],
       special:{body:2,qi:2}}
   ],
