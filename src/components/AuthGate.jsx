@@ -80,9 +80,15 @@ export default function AuthGate({ children }) {
       setBusy(true);
       try {
         const data = await register(email, password);
-        if (data.user) { setAuthed(true); setUser(data.user); }
-        else { setMsg('注册成功，请查看邮箱完成确认后登录'); }
-      } catch (ex) { setErr(regErrText(ex)); }
+        if (data.session?.user) { setAuthed(true); setUser(mapLocal(data.session.user)); }
+        else { setMsg('注册成功，请查收邮箱完成验证后再登录'); }
+      } catch (ex) {
+        const m = regErrText(ex);
+        if (/已注册|已存在/.test(m)) {
+          setMsg(m + '，已为你切换到登录');
+          setMode('login');
+        } else { setErr(m); }
+      }
       finally { setBusy(false); }
       return;
     }
@@ -104,12 +110,7 @@ export default function AuthGate({ children }) {
     }
   };
 
-  const regErrText = (ex) => {
-    const m = ex.message || '';
-    if (/already registered|已注册|exists/i.test(m)) return '该邮箱已注册，请直接登录';
-    if (/password/i.test(m)) return '密码强度不足，请使用至少 6 位字符';
-    return m;
-  };
+  const regErrText = (ex) => ex.message || '注册失败，请稍后再试';
 
   const handleForget = async () => {
     setErr(''); setMsg('');
