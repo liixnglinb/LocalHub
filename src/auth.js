@@ -8,6 +8,11 @@
  */
 import { supabase } from './lib/supabase';
 
+function getAuthRedirectUrl() {
+  const pathname = window.location.pathname.endsWith('/') ? window.location.pathname : `${window.location.pathname}/`;
+  return `${window.location.origin}${pathname}`;
+}
+
 // ---------- 错误信息中文化 ----------
 // Supabase 返回英文错误，这里统一映射成用户能看懂的中文。
 const ERROR_ZH = [
@@ -89,14 +94,18 @@ export async function login(email, password) {
 
 export async function register(email, password) {
   // 邮箱密码注册：发送确认邮件后自动登录（若项目未开启邮箱确认则直接登录）
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: getAuthRedirectUrl() },
+  });
   if (error) throw new Error(authErrorMessage(error));
   return { user: mapUser(data.user) };
 }
 
 export async function resetPassword(email) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname,
+    redirectTo: getAuthRedirectUrl(),
   });
   if (error) throw new Error(authErrorMessage(error));
   return { ok: true };
@@ -105,7 +114,10 @@ export async function resetPassword(email) {
 // ---------- 邮箱登录链接 / 验证码 ----------
 export async function sendCode(email) {
   // 发送 6 位验证码（需在 Supabase Auth 设置中开启 OTP 邮件；也可关闭后自动退化为登录链接）
-  const { error } = await supabase.auth.signInWithOtp({ email });
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: getAuthRedirectUrl() },
+  });
   if (error) throw new Error(authErrorMessage(error));
   return { ok: true };
 }
@@ -121,7 +133,7 @@ export async function loginWithCode(email, code) {
 export async function signInWithGitHub() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
-    options: { redirectTo: window.location.origin + window.location.pathname },
+    options: { redirectTo: getAuthRedirectUrl() },
   });
   if (error) throw new Error(authErrorMessage(error));
 }
