@@ -378,5 +378,5 @@ export default function AuthGate({ children }) {
     );
   }
 
-  return children({ onLogout, user });
+  return children({ onLogout: handleLogout, user });
 }
