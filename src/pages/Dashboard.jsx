@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, FolderKanban, ArrowRight } from 'lucide-react';
 import {
   NotebookPen, Link, Lightbulb, BookOpen, Baby, Share2, Trophy, Globe,
-  Wrench, CalendarDays, CalendarClock, Bot, Newspaper, Sword,
+  Wrench, CalendarDays, CalendarClock, Bot, Newspaper, Sword, Book,
 } from 'lucide-react';
 
 /* ============================================================
@@ -28,6 +28,7 @@ const TOOLS = [
   { to: '/agents',      label: 'AI Agent', desc: 'Agent 与 Skill 资源聚合', icon: Bot,       accent: '#7C5CFF' },
   { to: '/news',        label: 'AI 情报', desc: 'AI 五大类每日资讯速览', icon: Newspaper, accent: '#3B5BFF' },
   { to: '/jianlai',     label: '剑来·人生模拟', desc: '开放世界文字冒险游戏', icon: Sword, accent: '#B5462F' },
+  { to: '/deploy-guide', label: '部署指南', desc: '架构与部署完整参考文档', icon: Book, accent: '#3B5BFF' },
 ];
 
 export default function Dashboard({ onLogout, user }) {

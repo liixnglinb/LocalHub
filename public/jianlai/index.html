@@ -3,1441 +3,450 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>剑来 · 开放世界人生模拟器</title>
+<title>剑来 · 修仙传</title>
 <style>
-  :root{
-    --bg:#14110c; --bg2:#1d1810; --panel:#231b12; --panel2:#2c2217; --line:#3a2e1d;
-    --ink:#ece4d2; --dim:#9b9180; --gold:#c8a85a; --gold2:#e6c87a; --red:#b5462f; --jade:#5a8c6a; --blue:#6f93b8;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-    font-family:"Songti SC","SimSun","STSong",serif;line-height:1.8;}
-  body{background:#0d0b07;min-height:100vh;}
-  #app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:22px 16px 70px;}
-  .narr,.topbar,.broadcast,.free{text-shadow:0 1px 5px rgba(0,0,0,.7);}
-  .title-art{text-align:center;padding:30px 10px 14px;}
-  .title-art h1{font-size:42px;letter-spacing:12px;margin:0;color:var(--gold2);text-shadow:0 2px 18px rgba(200,168,90,.25);}
-  .title-art .sub{color:var(--dim);letter-spacing:5px;margin-top:8px;font-size:14px;}
-  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
-    border-radius:12px;padding:20px 22px;margin:16px 0;box-shadow:0 10px 30px rgba(0,0,0,.35);}
-  .narr{font-size:16.5px;white-space:pre-wrap;}
-  .narr .nar{display:block;margin:2px 0;color:var(--ink);}
-  .narr .say{display:block;margin:6px 0;padding-left:10px;border-left:2px solid var(--gold);color:#f0e8d6;}
-  .narr .who{color:var(--jade);font-weight:700;}
-  .narr .hl{color:var(--gold2);}
-  .chapter{color:var(--gold);letter-spacing:3px;font-size:13.5px;margin-bottom:8px;}
-  .broadcast{background:#120e09;border:1px solid var(--line);border-radius:8px;padding:8px 12px;
-    margin-top:14px;font-size:14px;color:var(--gold2);letter-spacing:1px;text-align:center;}
-  .choices{display:flex;flex-direction:column;gap:11px;margin-top:16px;}
-  .choice{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--gold);
-    padding:13px 15px;border-radius:8px;cursor:pointer;transition:.16s;font-size:15.5px;}
-  .choice:hover{background:#322718;border-left-color:var(--gold2);transform:translateX(3px);}
-  .choice .hint{display:block;color:var(--dim);font-size:13px;margin-top:5px;font-style:italic;}
-  .choice .tag{float:right;color:var(--jade);font-size:12.5px;margin-left:8px;}
-  .free{display:flex;gap:8px;margin-top:14px;}
-  .free input{flex:1;background:#120e09;border:1px solid var(--line);color:var(--ink);
-    border-radius:8px;padding:10px 12px;font-family:inherit;font-size:15px;}
-  .free button{background:var(--bg2);border:1px solid var(--line);color:var(--gold2);
-    border-radius:8px;padding:0 16px;cursor:pointer;font-family:inherit;}
-  .topbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:4px;align-items:center;}
-  .topbar .who{color:var(--ink);font-size:14.5px;}
-  .topbar .who b{color:var(--gold2);}
-  .btns{display:flex;gap:7px;flex-wrap:wrap;}
-  button.btn{background:var(--bg2);color:var(--ink);border:1px solid var(--line);padding:6px 12px;
-    border-radius:7px;cursor:pointer;font-family:inherit;font-size:13.5px;transition:.15s;}
-  button.btn:hover{border-color:var(--gold);color:var(--gold2);}
-  .id-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:14px;}
-  .id{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:15px;cursor:pointer;transition:.15s;}
-  .id:hover{border-color:var(--gold);background:#2e2418;}
-  .id h3{margin:0 0 6px;color:var(--gold2);letter-spacing:2px;font-size:16px;}
-  .id p{margin:0;font-size:13.5px;color:var(--dim);}
-  input.name{font-family:inherit;font-size:17px;background:var(--bg2);color:var(--ink);
-    border:1px solid var(--line);border-radius:8px;padding:9px 12px;width:100%;margin-top:8px;}
-  /* 修为面板 */
-  .rpanel{border:1px solid var(--gold);background:#fffdf3;color:#3a2e1a;border-radius:12px;
-    padding:16px 18px;margin:14px 0;font-family:"Songti SC","SimSun",serif;box-shadow:0 8px 26px rgba(0,0,0,.4);}
-  .rpanel .big{color:#b8860b;font-size:22px;font-weight:700;letter-spacing:2px;}
-  .rpanel .rule{color:#e6c86a;margin:8px 0;border-top:1px solid #e6c86a;opacity:.7;}
-  .rpanel .nm{color:#5a3a1a;font-size:18px;font-weight:700;}
-  .rpanel .lb{color:#666;}
-  .rpanel .pill{display:inline-block;background:#8b4513;color:#fff;border-radius:5px;padding:1px 8px;font-size:13px;margin-right:6px;}
-  .rpanel .pill2{display:inline-block;background:#d8a020;color:#fff;border-radius:5px;padding:1px 8px;font-size:13px;}
-  .rpanel .item{color:#c0392b;font-size:14px;}
-  .rpanel .sts{color:#c0392b;font-size:14px;}
-  .rpanel h4{background:#8b4513;color:#fff;display:inline-block;padding:2px 10px;border-radius:5px;font-size:14px;margin:10px 0 6px;}
-  .rpanel ul{margin:4px 0;padding-left:20px;}
-  .rpanel li{color:#b8860b;font-size:14px;margin:2px 0;}
-  .death{border:1px solid var(--red);background:#1c0f0c;border-radius:12px;padding:20px;margin:16px 0;text-align:center;}
-  .death .t{color:var(--red);font-size:24px;letter-spacing:6px;}
-  .death .d{color:var(--ink);font-size:15px;margin-top:10px;white-space:pre-wrap;}
-  .footer{text-align:center;color:var(--dim);font-size:12px;margin-top:28px;letter-spacing:2px;}
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#2c2218;border:1px solid var(--gold);
-    color:var(--gold2);padding:9px 16px;border-radius:8px;opacity:0;transition:.3s;pointer-events:none;font-size:14px;z-index:50;}
-  .toast.show{opacity:1;}
-  .simplelog{font-size:13.5px;color:var(--dim);}
-  .simplelog div{margin:2px 0;}
-  @media(max-width:560px){.id-grid{grid-template-columns:1fr}.title-art h1{font-size:32px;letter-spacing:7px}}
-  /* 视听反馈 */
-  .fx-flash{position:fixed;inset:0;pointer-events:none;z-index:60;opacity:0;transition:opacity .22s;
-    background:radial-gradient(circle at 50% 50%, rgba(90,140,106,.45), transparent 70%);}
-  .fx-flash.down{background:radial-gradient(circle at 50% 50%, rgba(181,70,47,.5), transparent 70%);}
-  .fx-shake{animation:fxshake .42s}
-  @keyframes fxshake{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-2px)}}
-  .fx-glow{position:fixed;inset:0;pointer-events:none;z-index:60;background:radial-gradient(circle at 50% 45%, rgba(230,200,122,.35), transparent 60%);
-    opacity:0;animation:fxglow .95s ease-out forwards;}
-  @keyframes fxglow{0%{opacity:0;transform:scale(.8)}30%{opacity:1}100%{opacity:0;transform:scale(1.3)}}
-  .fx-vignette{position:fixed;inset:0;pointer-events:none;z-index:55;
-    background:radial-gradient(circle at 50% 50%, transparent 28%, rgba(0,0,0,.86) 100%);opacity:0;animation:fxvig 1.2s ease-in forwards;}
-  @keyframes fxvig{to{opacity:1}}
-  .btn.audio-on{border-color:var(--gold);color:var(--gold2);}
-  /* ===== 水墨场景 / 昼夜 / 天气 ===== */
-  .scene-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0d0b07;}
-  .scene-tint{position:absolute;inset:0;pointer-events:none;transition:background .8s;}
-  .phase-dawn{background:linear-gradient(180deg,rgba(185,138,106,.20),transparent 55%);}
-  .phase-day{background:linear-gradient(180deg,rgba(255,250,235,.10),transparent 60%);}
-  .phase-dusk{background:linear-gradient(180deg,rgba(217,138,78,.22),transparent 60%);}
-  .phase-night{background:linear-gradient(180deg,rgba(8,14,30,.58),rgba(8,14,30,.28));}
-  .phase-night-end{background:linear-gradient(180deg,rgba(20,25,45,.42),transparent 60%);}
-  .wx{position:absolute;inset:0;pointer-events:none;}
-  .wx-rain{background:repeating-linear-gradient(102deg, transparent 0 7px, rgba(200,220,235,.16) 7px 8px);background-size:60px 60px;animation:wxrain .5s linear infinite;opacity:.5;}
-  @keyframes wxrain{to{background-position:-60px 60px;}}
-  .wx-snow{background-image:radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent),radial-gradient(2px 2px at 60% 70%, #fff 50%, transparent),radial-gradient(1.5px 1.5px at 80% 20%, #fff 50%, transparent),radial-gradient(2px 2px at 40% 85%, #fff 50%, transparent),radial-gradient(1.5px 1.5px at 10% 60%, #fff 50%, transparent);background-size:220px 220px;animation:wxsnow 9s linear infinite;opacity:.6;}
-  @keyframes wxsnow{to{background-position:0 220px;}}
-  .wx-fog{background:radial-gradient(circle at 30% 40%, rgba(220,225,230,.30), transparent 40%),radial-gradient(circle at 72% 62%, rgba(220,225,230,.24), transparent 45%);animation:wxfog 14s ease-in-out infinite alternate;opacity:.7;}
-  @keyframes wxfog{from{transform:translateX(-30px);}to{transform:translateX(40px);}}
-  .wx-thunder{animation:wxthunder 4s infinite;}
-  @keyframes wxthunder{0%,90%,100%{background:rgba(200,220,255,0);}92%{background:rgba(200,220,255,.38);}95%{background:rgba(200,220,255,.12);}97%{background:rgba(200,220,255,.30);}}
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--ink-black:#1a1a1a;--ink-dark:#2d2d2d;--ink-gray:#5a5a5a;--ink-light:#8a8a8a;--ink-paper:#f5f0e8;--ink-cream:#e8e0d0;--ink-red:#9a3a3a;--ink-gold:#a08030;--ink-blue:#3a5a7a;--ink-green:#3a6a4a}
+body{font-family:'STKaiti','KaiTi','楷体','SimSun',serif;background:var(--ink-black);color:var(--ink-paper);min-height:100vh;overflow-x:hidden}
+.bg-layer{position:fixed;top:0;left:0;right:0;bottom:0;background-size:cover;background-position:center;filter:brightness(0.35) saturate(0.6);transition:background-image 1.5s ease;z-index:0}
+.bg-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.7) 100%);z-index:0.5}
+.mist{position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 100%,rgba(180,170,155,0.08) 0%,transparent 60%);pointer-events:none;z-index:0.8;animation:mistFloat 25s ease-in-out infinite}
+@keyframes mistFloat{0%,100%{opacity:0.4;transform:translateX(0)}50%{opacity:0.7;transform:translateX(15px)}}
+#game-container{max-width:900px;margin:0 auto;padding:20px;position:relative;z-index:1;min-height:100vh}
+.ink-title{font-size:3.5rem;color:var(--ink-paper);text-shadow:0 0 10px rgba(200,190,170,0.2);letter-spacing:15px;text-align:center;padding:20px 0}
+.ink-subtitle{font-size:1rem;color:var(--ink-gray);letter-spacing:8px;text-align:center;margin-bottom:30px}
+.btn-ink{background:linear-gradient(135deg,rgba(40,40,40,0.9),rgba(25,25,25,0.95));border:1px solid var(--ink-gray);color:var(--ink-paper);padding:10px 20px;font-size:1rem;font-family:inherit;cursor:pointer;transition:all 0.3s}.btn-ink:hover{border-color:var(--ink-light);box-shadow:0 0 15px rgba(200,190,170,0.15);transform:translateY(-1px)}.btn-ink:active{transform:translateY(0)}.btn-ink:disabled{opacity:0.4;cursor:not-allowed}
+.btn-small{padding:5px 10px;font-size:0.8rem}.btn-wide{width:100%;text-align:left;padding:12px 16px;margin-bottom:5px}
+.input-ink{width:100%;background:rgba(10,10,10,0.6);border:1px solid var(--ink-gray);color:var(--ink-paper);padding:10px 14px;font-size:1rem;font-family:inherit;transition:border-color 0.3s}.input-ink:focus{outline:none;border-color:var(--ink-light)}
+.card-ink{background:linear-gradient(135deg,rgba(35,35,35,0.9),rgba(25,25,25,0.95));border:1px solid var(--ink-gray);padding:14px 16px;margin-bottom:6px;cursor:pointer;transition:all 0.3s}.card-ink:hover{border-color:var(--ink-light)}.card-ink.selected{border-color:var(--ink-paper);background:rgba(50,50,50,0.8);box-shadow:0 0 20px rgba(200,190,170,0.15)}
+.stat-bar{height:5px;background:rgba(0,0,0,0.5);border-radius:2px;overflow:hidden;border:1px solid rgba(80,80,80,0.3)}
+.stat-fill{height:100%;border-radius:2px;transition:width 0.5s ease}
+.stat-fill.qi{background:linear-gradient(90deg,#2a4a6a,#4a7a9a)}.stat-fill.body{background:linear-gradient(90deg,#6a2a2a,#9a4a4a)}.stat-fill.sword{background:linear-gradient(90deg,#4a4a4a,#7a7a7a)}.stat-fill.dao{background:linear-gradient(90deg,#8b6914,#c9a830)}.stat-fill.demon{background:linear-gradient(90deg,#5a2a5a,#8a4a8a)}
+.panel-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center}
+.panel-box{background:linear-gradient(135deg,rgba(30,30,30,0.98),rgba(20,20,20,0.99));border:2px solid var(--ink-gray);padding:20px 25px;max-width:650px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 0 40px rgba(0,0,0,0.5)}
+.ink-divider{height:1px;background:linear-gradient(90deg,transparent,var(--ink-gray),transparent);margin:12px 0}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--ink-black)}::-webkit-scrollbar-thumb{background:var(--ink-gray);border-radius:3px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-in{animation:fadeIn 0.5s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.game-screen{display:none}.game-header{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--ink-gray);margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.main-content{display:grid;grid-template-columns:1fr 260px;gap:12px}@media(max-width:700px){.main-content{grid-template-columns:1fr}}
+.narration-box{background:rgba(20,20,20,0.6);border-left:3px solid var(--ink-gray);padding:12px 14px;margin-bottom:10px;font-size:0.95rem;line-height:1.8;color:var(--ink-cream);font-style:italic;animation:slideUp 0.4s ease}
+.dialogue-box{background:rgba(25,25,25,0.7);border:1px solid var(--ink-gray);padding:10px 14px;margin-bottom:8px;animation:slideUp 0.3s ease}
+.dialogue-speaker{font-size:0.85rem;color:var(--ink-light);margin-bottom:3px;font-weight:bold}
+.dialogue-content{font-size:0.95rem;line-height:1.7;padding-left:8px;border-left:2px solid rgba(100,100,100,0.3)}
+.choice-btn{width:100%;text-align:left;padding:12px 16px;margin-bottom:5px;font-size:0.9rem;animation:slideUp 0.3s ease}
+.choice-hint{display:block;font-size:0.75rem;color:var(--ink-gray);margin-top:3px}
+.choice-risk{display:block;font-size:0.75rem;color:var(--ink-red);margin-top:2px;font-style:italic}
+.sidebar{background:rgba(20,20,20,0.5);border:1px solid var(--ink-gray);padding:10px;font-size:0.85rem}
+.sidebar-section{margin-bottom:10px}.sidebar-title{font-size:0.9rem;color:var(--ink-light);margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid rgba(80,80,80,0.3)}
+.map-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.map-cell{padding:10px 6px;text-align:center;border:1px solid var(--ink-gray);cursor:pointer;transition:all 0.3s;font-size:0.85rem}.map-cell:hover{border-color:var(--ink-light);background:rgba(50,50,50,0.3)}.map-cell.current{border-color:var(--ink-paper);background:rgba(60,60,60,0.4)}.map-cell.locked{opacity:0.4;cursor:not-allowed}
+.battle-screen{display:none}.battle-arena{background:rgba(15,15,15,0.8);border:1px solid var(--ink-gray);padding:12px;margin-bottom:8px;min-height:130px}.battle-entity{display:flex;align-items:center;gap:8px;margin-bottom:6px}.battle-actions{display:flex;flex-wrap:wrap;gap:5px}
+.log-box{background:rgba(10,10,10,0.6);border:1px solid var(--ink-gray);padding:8px;max-height:100px;overflow-y:auto;font-size:0.8rem;line-height:1.6;color:var(--ink-light)}.log-entry{margin-bottom:2px}.log-entry.combat{color:var(--ink-red)}.log-entry.gain{color:var(--ink-green)}.log-entry.loss{color:var(--ink-gold)}.log-entry.escape{color:var(--ink-blue)}
+.audio-controls{position:fixed;top:10px;right:10px;display:flex;gap:6px;z-index:50}
+.audio-btn{background:rgba(20,20,20,0.8);border:1px solid var(--ink-gray);color:var(--ink-light);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s}.audio-btn:hover{border-color:var(--ink-paper)}
+/* 通知系统 */
+#toast-container{position:fixed;top:50px;right:50%;transform:translateX(50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:rgba(30,30,30,0.95);border:1px solid var(--ink-gray);padding:10px 20px;font-size:0.9rem;animation:toastIn 0.3s ease,toastOut 0.3s ease 2.7s;max-width:400px;text-align:center;box-shadow:0 0 20px rgba(0,0,0,0.5)}
+.toast.gain{border-color:var(--ink-green)}.toast.loss{border-color:var(--ink-red)}.toast.event{border-color:var(--ink-gold)}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-20px)}}
+/* 成就 */
+.achievement-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--ink-gray);margin-bottom:5px;background:rgba(20,20,20,0.5)}
+.achievement-item.unlocked{border-color:var(--ink-gold);background:rgba(40,30,15,0.4)}
+.achievement-icon{font-size:1.5rem;width:40px;text-align:center}
+.achievement-unlocked{animation:pulse 0.5s ease 3}
+/* 进度条 */
+.progress-bar{height:4px;background:rgba(0,0,0,0.5);border-radius:2px;overflow:hidden;margin:5px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--ink-gold),var(--ink-paper));border-radius:2px;transition:width 0.5s ease}
+/* 死亡界面 */
+.death-screen{display:none;text-align:center;padding:40px 20px;animation:fadeIn 1s ease}
+.death-title{font-size:2.5rem;color:var(--ink-red);margin-bottom:20px;text-shadow:0 0 20px rgba(154,58,58,0.5)}
+.death-text{font-size:1.1rem;color:var(--ink-light);line-height:1.8;margin-bottom:15px}
+.death-legacy{font-size:0.95rem;color:var(--ink-gold);margin-bottom:30px;font-style:italic}
+/* 关系条 */
+.rel-bar{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(80,80,80,0.2)}
+.rel-name{width:60px;font-size:0.85rem}.rel-value{flex:1}.rel-tier{font-size:0.75rem;width:70px;text-align:right}
+/* 角色头像占位 */
+.char-portrait{width:40px;height:40px;border:1px solid var(--ink-gray);display:flex;align-items:center;justify-content:center;font-size:1.2rem;background:rgba(0,0,0,0.3);flex-shrink:0}
+/* 加载提示 */
+.loading-text{text-align:center;color:var(--ink-gray);font-size:0.9rem;padding:20px;animation:pulse 1.5s ease infinite}
+/* 装备槽 */
+.equip-slot{display:flex;align-items:center;gap:8px;padding:8px;border:1px dashed var(--ink-gray);margin-bottom:4px;font-size:0.85rem;cursor:pointer;transition:all 0.3s}
+.equip-slot:hover{border-color:var(--ink-light);background:rgba(50,50,50,0.2)}
+.equip-slot.filled{border-style:solid;border-color:var(--ink-gold)}
+.equip-label{width:50px;color:var(--ink-gray);font-size:0.8rem}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div class="toast" id="toast"></div>
+<div class="bg-layer" id="bg-layer" style="background-image:url('images/title.jpg')"></div>
+<div class="bg-overlay"></div>
+<div class="mist"></div>
+<div id="toast-container"></div>
+
+<div id="game-container">
+  <div class="audio-controls">
+    <button class="audio-btn" id="music-btn" onclick="toggleMusic()" title="音乐">🎵</button>
+    <button class="audio-btn" id="sfx-btn" onclick="toggleSfx()" title="音效">🔔</button>
+  </div>
+
+  <!-- 标题 -->
+  <div id="title-screen" class="fade-in">
+    <div class="ink-title">剑来</div>
+    <div class="ink-subtitle">修仙传 · 水墨录</div>
+    <div class="ink-divider"></div>
+    <div style="text-align:center;font-size:0.9rem;color:var(--ink-light);margin:20px 0;line-height:1.8">
+      "我陈平安，唯有一剑，可搬山，倒海，降妖，镇魔，敕神，摘星，断江，摧城，开天！"
+    </div>
+    <div class="ink-divider"></div>
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:300px;margin:30px auto">
+      <button class="btn-ink" onclick="showCharacterSelect()">踏入修仙路</button>
+      <button class="btn-ink" onclick="showLoadPanel()">读取存档</button>
+      <button class="btn-ink" onclick="showAbout()">关于</button>
+    </div>
+  </div>
+
+  <!-- 角色创建 -->
+  <div id="character-select" style="display:none">
+    <h2 style="text-align:center;margin-bottom:20px">选择修行之路</h2>
+    <div style="margin-bottom:15px">
+      <h3 style="color:var(--ink-light);margin-bottom:8px;font-size:0.95rem">修行模式</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="card-ink selected" id="mode-free" onclick="selectMode('free')" style="flex:1;min-width:150px">
+          <div style="font-size:1.1rem">原创散修</div>
+          <div style="font-size:0.8rem;color:var(--ink-gray);margin-top:4px">自由定义出身、修行流派</div>
+        </div>
+        <div class="card-ink" id="mode-story" onclick="selectMode('story')" style="flex:1;min-width:150px">
+          <div style="font-size:1.1rem">陈平安剧情</div>
+          <div style="font-size:0.8rem;color:var(--ink-gray);margin-top:4px">泥瓶巷开局，经历原著完整剧情</div>
+        </div>
+      </div>
+    </div>
+    <div id="free-options">
+      <div style="margin-bottom:15px">
+        <h3 style="color:var(--ink-light);margin-bottom:8px;font-size:0.95rem">出身</h3>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">
+          <div class="card-ink selected" onclick="selectBackground('poor')" id="bg-poor"><div>山野孤儿</div><div style="font-size:0.75rem;color:var(--ink-gray)">根骨+2，悟性+1，心境+1</div></div>
+          <div class="card-ink" onclick="selectBackground('scholar')" id="bg-scholar"><div>书香门第</div><div style="font-size:0.75rem;color:var(--ink-gray)">悟性+3，心境+1</div></div>
+          <div class="card-ink" onclick="selectBackground('merchant')" id="bg-merchant"><div>商贾之家</div><div style="font-size:0.75rem;color:var(--ink-gray)">金钱+500，悟性+1</div></div>
+          <div class="card-ink" onclick="selectBackground('martial')" id="bg-martial"><div>武学世家</div><div style="font-size:0.75rem;color:var(--ink-gray)">体魄+3，根骨+1</div></div>
+        </div>
+      </div>
+      <div style="margin-bottom:15px">
+        <h3 style="color:var(--ink-light);margin-bottom:8px;font-size:0.95rem">修行流派</h3>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+          <div class="card-ink selected" onclick="selectPath('sword')" id="path-sword"><div>🗡️ 剑修</div><div style="font-size:0.75rem;color:var(--ink-gray)">攻高，需飞剑</div></div>
+          <div class="card-ink" onclick="selectPath('qi')" id="path-qi"><div>🌀 练气士</div><div style="font-size:0.75rem;color:var(--ink-gray)">术法符箓</div></div>
+          <div class="card-ink" onclick="selectPath('body')" id="path-body"><div>💪 纯粹武夫</div><div style="font-size:0.75rem;color:var(--ink-gray)">肉搏近战</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="story-options" style="display:none;margin-bottom:15px">
+      <div class="narration-box">骊珠洞天，泥瓶巷。你是陈平安，父母双亡的少年。一把木剑，一块老瓷片。小镇即将迎来大变，你的修仙之路从这里开始...</div>
+    </div>
+    <div style="margin-bottom:15px">
+      <h3 style="color:var(--ink-light);margin-bottom:8px;font-size:0.95rem">道号</h3>
+      <input type="text" class="input-ink" id="player-name" placeholder="输入你的道号...">
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-ink" onclick="backToTitle()">返回</button>
+      <button class="btn-ink" onclick="startGame()" style="flex:1">开始修行</button>
+    </div>
+  </div>
+
+  <!-- 主游戏 -->
+  <div id="game-screen" class="game-screen">
+    <div class="game-header">
+      <div>
+        <span style="font-size:1.1rem" id="player-name-display"></span>
+        <span style="font-size:0.8rem;color:var(--ink-gray);margin-left:8px" id="realm-display"></span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn-ink btn-small" onclick="showPanel('status')">状态</button>
+        <button class="btn-ink btn-small" onclick="showPanel('skills')">功法</button>
+        <button class="btn-ink btn-small" onclick="showPanel('inventory')">背包</button>
+        <button class="btn-ink btn-small" onclick="showPanel('social')">人物</button>
+        <button class="btn-ink btn-small" onclick="showPanel('map')">地图</button>
+        <button class="btn-ink btn-small" onclick="showPanel('achievements')">成就</button>
+        <button class="btn-ink btn-small" onclick="saveGame()">存档</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;font-size:0.8rem;color:var(--ink-light)">
+      <span id="time-display"></span>
+      <span id="weather-display"></span>
+      <span id="location-display"></span>
+    </div>
+    <div class="main-content">
+      <div id="story-panel">
+        <div id="narration-area"></div>
+        <div id="choices-area" style="margin-top:12px"></div>
+      </div>
+      <div class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">属性</div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:0.8rem" id="stats-quick"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">心境</div>
+          <div style="font-size:0.8rem">
+            <div>道心: <span id="dao-heart-val">50</span>/100</div>
+            <div class="stat-bar"><div class="stat-fill dao" id="dao-heart-bar" style="width:50%"></div></div>
+            <div style="margin-top:4px">心魔: <span id="demon-val">0</span>/100</div>
+            <div class="stat-bar"><div class="stat-fill demon" id="demon-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">关系</div>
+          <div id="rels-quick" style="font-size:0.75rem"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 战斗 -->
+  <div id="battle-screen" class="battle-screen">
+    <div class="game-header">
+      <div style="font-size:1.1rem">⚔️ 战斗中</div>
+      <span id="battle-title"></span>
+    </div>
+    <div class="battle-arena" id="battle-arena"></div>
+    <div class="battle-actions" id="battle-actions"></div>
+    <div class="log-box" id="battle-log" style="margin-top:8px"></div>
+  </div>
+
+  <!-- 死亡 -->
+  <div id="death-screen" class="death-screen">
+    <div class="death-title">道陨</div>
+    <div class="death-text" id="death-text">你的修行之路到此为止了。</div>
+    <div class="death-legacy" id="death-legacy"></div>
+    <div class="ink-divider"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:250px;margin:20px auto">
+      <button class="btn-ink" onclick="backToTitle()">返回主界面</button>
+      <button class="btn-ink" onclick="showLoadPanel()">读取存档</button>
+    </div>
+  </div>
+</div>
+
+<!-- 面板 -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel(event)">
+  <div class="panel-box" id="panel-content"></div>
+</div>
+
+<script src="jianlai-engine.js"></script>
 <script>
-"use strict";
+let gameState = null, selectedMode = 'free', selectedBackground = 'poor', selectedPath = 'sword';
 
-/* ================= 数值与境界 ================= */
-const WUFU = ["未入门","泥胚","木胎","水银","英魂","雄魄","武胆","金身","羽化","山巅"];
-const LIANQI = ["未入门","铜皮","草根","柳筋","骨气","铸炉","洞府","观海","龙门","金丹","元婴","玉璞","仙人","飞升","十四合道","十五境"];
-/* 十二时辰 / 天气 / 道途 / 场景 / 剑意 */
-const SHICHEN = ["子时","丑时","寅时","卯时","辰时","巳时","午时","未时","申时","酉时","戌时","亥时"];
-function shichenPhase(h){ if(h===3) return "night-end"; if(h>=4&&h<=6) return "dawn"; if(h===7||h===8) return "day"; if(h===9||h===10) return "dusk"; return "night"; }
-const WEATHER = ["晴","雨","雪","雾","雷"];
-const WEATHER_NAME = {晴:"晴空",雨:"细雨",雪:"落雪",雾:"薄雾",雷:"雷雨"};
-const PATHS = {
-  wufu:{ name:"武夫道（肉身成圣）", desc:"桩功蓄力，近身肉搏，不靠灵气。", fx:{wufu:1,tupo:10} },
-  lianqi:{ name:"练气道（吐纳天地）", desc:"术法符箓，远程消耗。", fx:{lianqi:1,lingqi:12} },
-  jianxiu:{ name:"剑修道（本命飞剑）", desc:"飞剑出窍，杀力最高。", fx:{jianyi:10,lingqi:6} },
-  sanxiu:{ name:"散修三修（博采众长）", desc:"武夫/练气/剑修皆涉。", fx:{tupo:5,lingqi:5,wuxing:5} },
-};
-const SCENE_NAME = { lizhu:"骊珠洞天", niping:"泥瓶巷", changcheng:"剑气长城", shujian:"书简湖", shuyuan:"浩然书院", ouhua:"藕花福地", manhuang:"蛮荒天下" };
-function jianyiTier(x){ if(x>=90) return "剑意通明"; if(x>=70) return "剑心澄澈"; if(x>=50) return "大成"; if(x>=30) return "小成"; if(x>=12) return "初窥"; return "未入门"; }
-function benxinTier(x){
-  const t=[[9,'灰烬'],[19,'蒙尘'],[29,'迟疑'],[39,'摇摆'],[49,'自守'],[59,'持正'],[69,'明澈'],[79,'坚毅'],[89,'通明'],[100,'剑心澄澈']];
-  for(const [m,n] of t) if(x<=m) return n; return '剑心澄澈';
+function selectMode(m) { selectedMode=m; document.querySelectorAll('#mode-free,#mode-story').forEach(c=>c.classList.remove('selected')); document.getElementById('mode-'+m).classList.add('selected'); document.getElementById('free-options').style.display=m==='free'?'block':'none'; document.getElementById('story-options').style.display=m==='story'?'block':'none'; AudioEngine.playClick(); }
+function selectBackground(b) { selectedBackground=b; ['poor','scholar','merchant','martial'].forEach(b=>document.getElementById('bg-'+b).classList.toggle('selected',b===b)); AudioEngine.playClick(); }
+function selectPath(p) { selectedPath=p; ['sword','qi','body'].forEach(p=>document.getElementById('path-'+p).classList.toggle('selected',p===p)); AudioEngine.playClick(); }
+
+function showCharacterSelect() { AudioEngine.init();AudioEngine.resume();AudioEngine.playClick(); document.getElementById('title-screen').style.display='none'; document.getElementById('character-select').style.display='block'; }
+function showAbout() { AudioEngine.playClick(); showPanelHTML('关于','<p style="line-height:1.8">剑来·修仙传 — 水墨国风修仙模拟游戏</p><p style="color:var(--ink-gray);margin-top:10px">根据烽火戏诸侯《剑来》世界观构建</p><p style="color:var(--ink-gray);margin-top:10px;font-size:0.85rem">v2.0 · 完整剧情版</p>'); }
+function backToTitle() { AudioEngine.playClick(); ['character-select','game-screen','battle-screen','death-screen'].forEach(id=>document.getElementById(id).style.display='none'); document.getElementById('title-screen').style.display='block'; }
+
+function startGame() {
+  const name = document.getElementById('player-name').value.trim() || '无名修士';
+  AudioEngine.playClick();
+  gameState = Engine.createNewGame({ name, story: selectedMode==='story', background: selectedBackground, path: selectedPath });
+  document.getElementById('character-select').style.display='none';
+  document.getElementById('game-screen').style.display='block';
+  Engine.init(gameState);
+  AudioEngine.playTheme('town');
+  updateUI(); showScene();
+  toast('踏入修仙路，天地广阔任你行。','event');
 }
-const IDENTITIES = {
-  niping:{ name:"泥瓶巷的少年", desc:"陈平安的邻居发小——恶日出生，本命瓷五岁那年碎了，留不住福缘。",
-    fx:{benxin:6}, open:"你蹲在泥瓶巷的门槛上，看陈平安把一捆柴码齐。他冲你笑了一下，没说话——你们从小就这样。" },
-  xueshu:{ name:"学塾的学童", desc:"齐静春的学生——每日听先生讲《论语》。",
-    fx:{benxin:4, lianqi:1}, open:"学塾里书声琅琅。齐先生捋着袖子走过你桌边，只轻声问了一句：‘今日，可曾用心？’" },
-  tiejiang:{ name:"铁匠铺的学徒", desc:"阮邛铺子的伙计——阮秀的师兄，烟火气最重。",
-    fx:{qixue:4}, open:"铁匠铺火星四溅。阮秀踮脚往炉里添炭，回头瞪你：‘看什么看，火快灭了！’" },
-  yapu:{ name:"药铺的学徒", desc:"杨老头铺子的伙计——他教你认药，话里有话。",
-    fx:{benxin:2}, open:"杨家药铺里一股草药味。杨老头叼着旱烟袋，眯眼看你：‘脚下生根了？去，把那株黄精分拣了。’" },
-  waixiang:{ name:"流落小镇的外乡孩子", desc:"与所有人从陌生开始——自由最高。",
-    fx:{}, open:"你背着破包袱站在镇口，谁也不认识你，你也不认识谁。风吹过，街上的眼光扫过来，又移开。" },
-};
 
-/* ================= 状态 ================= */
-let state=null;
-const $app=document.getElementById("app");
-const $toast=document.getElementById("toast");
-function toast(m){ $toast.textContent=m; $toast.classList.add("show"); setTimeout(()=>$toast.classList.remove("show"),1500); }
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-
-const SAVE_KEY="jianlai_sim_v1";
-function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
-function load(){ try{ const r=localStorage.getItem(SAVE_KEY); if(!r) return false; state=JSON.parse(r); return true; }catch(e){ return false; } }
-function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
-
-/* ================= 剧情节点 BEATS ================= */
-/* line: {t:'nar'|'say', who?, text, if?}  choice:{label,hint?,fx?,go?,if?,death?,deathText?,tag?} */
-const BEATS = {
-  open:{
-    node:"序", round:0,
-    lines:[
-      {t:'nar', text:"二月二，龙抬头。泥瓶巷方向传来低低的驱蛇声。"},
-      {t:'nar', text:"今晚的镇子，和往常不太一样——听说，镇口来了很多陌生人。"},
-      {t:'nar', text:"在一切开始之前——你是谁，又是怎么来的？"},
-    ],
-    choices:[
-      {label:"顺应：先到街口，远远看看那些‘山上神仙’的排场", hint:"低风险，长见识，但别靠太近", fx:{benxin:1}, go:"e1a"},
-      {label:"逆反·搞事：直接凑上去，跟外乡修士搭话", hint:"高风险，你只是个凡人少年，他们未必把你当人", fx:{benxin:-1}, go:"e1_risk"},
-      {label:"观望·探索：先回巷子，问问陈平安听见了什么", hint:"稳妥，加深与发小的羁绊", fx:{}, go:"e1_peace"},
-      {label:"自由行动（做任何你想做的事）", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ① 外乡人涌入 ===== */
-  e1a:{
-    node:"①外乡人涌入",
-    lines:[
-      {t:'nar', text:"镇口大路上，几人衣袂生风。一人一尘不染，靴上绣云；一人高冠大袖，锦衣玉带；还有个猿背人形的家伙，气场压得路边狗都不叫了。"},
-      {t:'say', who:"街坊", text:"那是……山上神仙？"},
-      {t:'nar', text:"百姓们怯怯退开，又忍不住偷看。空气里有一股说不清的压迫。"},
-    ],
-    choices:[
-      {label:"顺应：压下好奇，低头做自己的事", hint:"本心稳，但错过第一手情报", fx:{benxin:1}, go:"e1b"},
-      {label:"逆反·搞事：故意从那猿背人形身边晃过去", hint:"他可能觉得你碍眼", fx:{benxin:-2}, go:"e1_provoke"},
-      {label:"观望·探索：蹲在墙角，把他们的人数和打扮记下来", hint:"情报+，日后有用", fx:{benxin:1}, tag:"情报", go:"e1b"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e1_risk:{
-    node:"①外乡人涌入",
-    lines:[
-      {t:'nar', text:"你挤进人群，冲那锦衣玉带的人拱手：‘前辈，小辈初来……’"},
-      {t:'say', who:"苻南华", text:"（瞥你一眼，似看蝼蚁）哪来的泥腿子，也配说话。"},
-      {t:'nar', text:"一股劲风掀得你踉跄后退，摔在泥里。周围有人笑，有人别过头。"},
-    ],
-    choices:[
-      {label:"顺应：爬起来拍拍土，退到一旁", hint:"吃瘪，但保住颜面", fx:{benxin:1, qixue:-2}, go:"e1b"},
-      {label:"逆反·搞事：盯着他背影，记下了这张脸", hint:"记仇容易，报仇难", fx:{benxin:-1}, go:"e1b", tag:"结怨·苻南华"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e1_peace:{
-    node:"①外乡人涌入",
-    lines:[
-      {t:'nar', text:"你拐回泥瓶巷。陈平安正把晾干的衣服收进屋，见你回来，递过半块烤红薯。"},
-      {t:'say', who:"陈平安", text:"镇口来了不少人。我昨儿听见，说是冲着咱们小镇来的。"},
-      {t:'nar', text:"他说话很轻，像怕惊动什么。‘我答应你的事情，就一定会做到’——这是他常挂在嘴边的话。"},
-    ],
-    choices:[
-      {label:"顺应：拍拍他肩，‘有我在’", hint:"羁绊+", fx:{}, go:"e1b", tag:"与陈平安更近"},
-      {label:"逆反·搞事：拉着他去镇口看热闹", hint:"他多半会皱眉，但拗不过你", fx:{benxin:-1}, go:"e1a"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e1_provoke:{
-    node:"①外乡人涌入",
-    lines:[
-      {t:'nar', text:"你从那猿背人形身边大摇大摆走过，还吹了声口哨。"},
-      {t:'say', who:"搬山猿", text:"（垂眼，声音如磨石）小子，你身上这股不知死活的味儿，倒新鲜。"},
-      {t:'nar', text:"它没动手——只是像看一只蚂蚁。可你知道，它若真恼，你连疼都来不及喊。"},
-    ],
-    choices:[
-      {label:"顺应：装作没事，快步离开", hint:"怂得及时", fx:{benxin:2, qixue:-1}, go:"e1b"},
-      {label:"逆反·搞事：回头冲它做了个鬼脸", hint:"作死边缘", fx:{benxin:-3}, go:"e1_death1"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e1_death1:{
-    node:"①外乡人涌入", death:true,
-    lines:[
-      {t:'nar', text:"你做了个鬼脸。搬山猿眉头一皱，指节轻轻一弹——"},
-      {t:'nar', text:"你甚至没看清那道劲风从哪来，胸口已陷下去半寸。"},
-    ],
-    deathText:"你被一头大妖随手碾碎，像碾死一只蚂蚁。\n泥瓶巷少了个不知死活的少年，没人记得你的名字。"
-  },
-  e1b:{
-    node:"①外乡人涌入",
-    lines:[
-      {t:'nar', text:"街边，一个头戴莲花冠的年轻道士支起摊子，招牌写着‘算命’。"},
-      {t:'say', who:"陆沉", text:"年轻人，走过路过不要错过，抽支签，让贫道帮你算上一卦吧！十文……三文也行，五文，五文成交！"},
-      {t:'say', who:"陆沉", text:"命里八尺，莫求一丈。"},
-      {t:'nar', text:"他写完符纸，望着你（或陈平安）的背影幽幽一叹，把黄纸符文塞进你手里。"},
-    ],
-    choices:[
-      {label:"顺应：花五文钱，接了符文", hint:"得一张祈福符文，陆沉记下了你", fx:{benxin:1}, go:"e1c", tag:"陆沉的符文"},
-      {label:"逆反·搞事：骂他江湖骗子，把摊子掀了", hint:"道士笑嘻嘻，但你惹了个看不透的人", fx:{benxin:-2}, go:"e1c", tag:"得罪陆沉"},
-      {label:"观望·探索：不抽签，只听他还会说什么", hint:"情报+，不破财", fx:{}, go:"e1c"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e1c:{
-    node:"①外乡人涌入",
-    lines:[
-      {t:'nar', text:"药铺后院，杨老头吞云吐雾，从不白收你的药材，也从不压价。"},
-      {t:'say', who:"杨老头", text:"（叼着旱烟袋）这阵子，少往镇口凑。天上盯着咱们的，不止一只眼。"},
-      {t:'nar', text:"学塾里，齐先生讲《论语》，窗外却有几道目光，暗中往孩子们身上扫。"},
-      {t:'say', who:"齐静春", text:"道理都在书上，做人，却在书外。"},
-    ],
-    choices:[
-      {label:"顺应：记下令先生的‘书外’二字", hint:"本心+，齐先生记住了你", fx:{benxin:2}, go:"e2a", tag:"齐先生留意"},
-      {label:"逆反·搞事：课后拦住齐先生，追问‘天上那只眼’", hint:"他不会明说，但会另眼相看", fx:{benxin:1}, go:"e2a", tag:"试探齐先生"},
-      {label:"观望·探索：去药铺帮杨老头分拣药材，套话", hint:"话里有话，慢慢听", fx:{}, go:"e2a", tag:"杨老头线"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ② 蔡金简断长生桥 ===== */
-  e2a:{
-    node:"②蔡金简断长生桥",
-    lines:[
-      {t:'nar', text:"几日后，陈平安走在路上，忽然心口发闷，脚步慢了半拍——像有什么东西，在他心里种下。"},
-      {t:'nar', text:"你陪着他。远处，一个手持白碗的说书先生（刘志茂）远远瞥来一眼，又低头摇扇。"},
-      {t:'say', who:"陈平安", text:"不知道为啥，今天……有点想认命。"},
-    ],
-    choices:[
-      {label:"顺应：劝他别胡思乱想，陪他走完这段路", hint:"羁绊+", fx:{}, go:"e2b"},
-      {label:"逆反·搞事：冲那说书先生瞪回去", hint:"你可能被他盯上", fx:{benxin:-1}, go:"e2b", tag:"刘志茂留意"},
-      {label:"观望·探索：绕到陈平安身前，替他挡住那道目光", hint:"他未必察觉，但心安", fx:{benxin:1}, go:"e2b"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e2b:{
-    node:"②蔡金简断长生桥",
-    lines:[
-      {t:'nar', text:"一靴子踩上黏糊糊的臭狗屎——是那位一尘不染的女修，蔡金简。"},
-      {t:'say', who:"陈平安", text:"这位姐姐，你踩中狗屎，已经大半天了，为啥还不赶紧刮蹭掉？"},
-      {t:'say', who:"蔡金简", text:"（脸色铁青）蝼蚁，也敢多嘴。"},
-      {t:'nar', text:"她手指轻戳陈平安额头，再一掌覆上心口轻轻一按——快若奔雷。"},
-    ],
-    choices:[
-      {label:"顺应：冲上去想拉开她，却被气浪掀翻", hint:"你救不了，只能看着", fx:{qixue:-3, benxin:1}, go:"e2c"},
-      {label:"逆反·搞事：捡起砖头砸她", hint:"凡人砸金丹？你先想想", fx:{benxin:-2}, go:"e2_death"},
-      {label:"观望·探索：死死记住她的脸和那一按的手法", hint:"情报+，日后有用", fx:{}, go:"e2c", tag:"铭记蔡金简"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e2_death:{
-    node:"②蔡金简断长生桥", death:true,
-    lines:[
-      {t:'nar', text:"你抡起砖头。蔡金简甚至没回头，袖袍一拂——"},
-      {t:'nar', text:"你飞出去，撞在墙上，再没起来。金丹修士眼里，你连蝼蚁都不算。"},
-    ],
-    deathText:"你死在一个金丹女修的随手一拂之下。\n陈平安后来在巷口捡到你半块没吃完的红薯，默默埋了。"
-  },
-  e2c:{
-    node:"②蔡金简断长生桥",
-    lines:[
-      {t:'nar', text:"蔡金简临走，回头一笑，那是真话也是戏弄。"},
-      {t:'say', who:"蔡金简", text:"你最多只剩半年时间，就要死了。"},
-      {t:'nar', text:"陈平安知道她说的是真话。他愣了愣，竟咧嘴一笑，继续把路走完。"},
-      {t:'nar', text:"此后，他捡回五岁那年父亲打碎的本命瓷残片，用布包好，随身带着。"},
-    ],
-    choices:[
-      {label:"顺应：陪他去捡那枚碎瓷片", hint:"他记你一辈子", fx:{benxin:1}, go:"e2d", tag:"陈平安的瓷片"},
-      {label:"逆反·搞事：私下找刘志茂算账（你打不过，但能骂）", hint:"泄愤，可能被记下", fx:{benxin:-1}, go:"e2d", tag:"找刘志茂"},
-      {label:"观望·探索：去问杨老头，本命瓷到底是什么", hint:"他可能吐露半句真相", fx:{}, go:"e2_yang"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e2_yang:{
-    node:"②蔡金简断长生桥",
-    lines:[
-      {t:'nar', text:"药铺里，杨老头把旱烟袋在桌沿磕了磕。"},
-      {t:'say', who:"杨老头", text:"本命瓷碎了，是好事。买瓷的人，会把孩子当牵线木偶——你爹，是替你碎的。"},
-      {t:'nar', text:"他没再多说。‘恶日出生者命格极硬，是千年暗室一灯即明的那盏灯’——这话，他咽回了肚里。"},
-    ],
-    choices:[
-      {label:"顺应：深深鞠躬，‘多谢杨伯’", hint:"本心+，杨老头高看一眼", fx:{benxin:2}, go:"e2d", tag:"杨老头线·本命瓷"},
-      {label:"逆反·搞事：追问‘我爹是谁、谁买瓷’", hint:"他只笑，不答", fx:{}, go:"e2d"},
-      {label:"试探：再问‘齐先生，究竟是何方神圣’", hint:"他沉吟片刻", fx:{benxin:1}, go:"e_reveal_qi"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e_reveal_qi:{
-    node:"②蔡金简断长生桥",
-    lines:[
-      {t:'nar', text:"杨老头磕了磕旱烟袋，目光忽然深得像两口古井。"},
-      {t:'say', who:"杨老头", text:"齐静春……文圣老爷子的亲传弟子，十四境的圣人。画地为牢六十年，只为护这小镇六千百姓。"},
-      {t:'say', who:"杨老头", text:"他教人‘君子不救’，是怕他走后，你们这些小子学他去送死。道理，他都替你们想在前头了。"},
-      {t:'nar', text:"他没再多说。‘文圣一脉’‘十四境’这些字眼，沉甸甸压在你心上。"},
-    ],
-    choices:[
-      {label:"顺应：郑重行礼，‘多谢杨伯点醒’", hint:"本心+，你懂了先生的苦心", fx:{benxin:2}, go:"e2d", tag:"知齐先生身份"},
-      {label:"逆反·搞事：追问杨老头自己是谁", hint:"他笑‘我就是个卖药的’", fx:{}, go:"e2d"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e2d:{
-    node:"②蔡金简断长生桥",
-    lines:[
-      {t:'nar', text:"雨夜，偏僻巷弄。陈平安骤然冲出，右手砸在那女修腹上迫她弯腰，左手瓷片向上一抬——"},
-      {t:'nar', text:"瓷片没入她喉咙，鲜血喷涌，再一拳撞她入墙。一个凡人少年，反杀了金丹修士。"},
-      {t:'nar', text:"天地忽地静止。齐先生现身，止住了陈平安连杀苻南华的势头，而后……复活了她。"},
-      {t:'say', who:"齐静春", text:"（望着你）这孩子，会善待世人。"},
-    ],
-    choices:[
-      {label:"顺应：替陈平安望风，挡住旁人视线", hint:"你是他过命的兄弟", fx:{}, go:"e3a", tag:"与陈平安过命"},
-      {label:"逆反·搞事：冲上去补刀（被静止天地拦下）", hint:"莽，但齐先生不怪你", fx:{benxin:-1}, go:"e3a"},
-      {label:"观望·探索：事后问齐先生，为何要救那女修", hint:"他答：‘不让棋子替真恶人背锅’", fx:{benxin:1}, go:"e3a", tag:"齐先生·道理"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ③ 宁姚入镇 ===== */
-  e3a:{
-    node:"③宁姚入镇",
-    lines:[
-      {t:'nar', text:"重伤的黑衣少女被那莲花冠道士背进陈平安家。道士帮她摘了帷帽、洗了脸，自己溜得比谁都快。"},
-      {t:'say', who:"宁姚", text:"你好，我爹姓宁，我娘姓姚，所以我叫宁姚。"},
-      {t:'say', who:"陈平安", text:"你好，我爹姓陈，我娘也姓陈……我叫陈平安！"},
-      {t:'nar', text:"她看人极准。你心思正不正，她一眼便知。"},
-    ],
-    choices:[
-      {label:"顺应：端碗热汤送去，不多话", hint:"她记恩", fx:{benxin:1}, go:"e3b", tag:"宁姚记恩"},
-      {label:"逆反·搞事：逗她‘你脸红了’，被她按剑", hint:"剑气溢出三寸，你怂了", fx:{benxin:-2, qixue:-1}, go:"e3b", tag:"惹宁姚"},
-      {label:"观望·探索：旁听她教陈平安认拳谱《撼山谱》", hint:"学拳法契机", fx:{}, go:"e3b", tag:"撼山谱"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e3b:{
-    node:"③宁姚入镇",
-    lines:[
-      {t:'nar', text:"数日后，宁姚拿出一部古老拳谱《撼山谱》——分生死不分胜负，全谱仅六式。"},
-      {t:'say', who:"宁姚", text:"我宁姚为人处世，滴水之恩，涌泉相报。"},
-      {t:'nar', text:"她只看你一眼：‘想学？先让我看看，你人正不正。’"},
-    ],
-    choices:[
-      {label:"顺应：坦然任她打量，不遮不掩", hint:"她点头，许你旁看；体魄+", fx:{benxin:1, tupo:3}, go:"e4a", tag:"宁姚认可"},
-      {label:"逆反·搞事：吹牛‘我本事大着呢’", hint:"她冷笑，转头不理", fx:{benxin:-2}, go:"e4a"},
-      {label:"观望·探索：问她从哪来、为何重伤", hint:"她不答，但记住你好奇", fx:{}, go:"e4a"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ④ 顾璨被带走 ===== */
-  e4a:{
-    node:"④顾璨被带走",
-    lines:[
-      {t:'nar', text:"说书先生刘志茂，盯上了顾璨——更准确说，盯上了顾璨家水缸下那尾蛟龙泥鳅。"},
-      {t:'say', who:"顾璨", text:"（被拽着，大哭）这样不对，泥鳅是陈平安的！"},
-      {t:'nar', text:"齐先生六字如春雷：‘给我——速速离去！’勒令刘志茂留两袋金精铜钱，三十年不许离书简湖。"},
-    ],
-    choices:[
-      {label:"顺应：帮顾璨把那两袋铜钱和拳谱送去陈平安院里", hint:"顾璨哽咽着谢你", fx:{benxin:1}, go:"e4b", tag:"顾璨托付"},
-      {label:"逆反·搞事：偷偷藏了一枚金精铜钱", hint:"贪小，心不安", fx:{benxin:-3}, go:"e4b", tag:"私藏铜钱"},
-      {label:"观望·探索：远远看刘志茂底细，记他特征", hint:"情报+", fx:{}, go:"e4b", tag:"刘志茂底细"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e4b:{
-    node:"④顾璨被带走",
-    lines:[
-      {t:'nar', text:"顾璨撒腿跑向泥瓶巷，把东西扔在陈平安院里，哽咽：‘小泥鳅是你的，对不起。’"},
-      {t:'say', who:"陈平安", text:"老天爷挺小气的，从小到大，自己在意的人，好像如何也挽留不住。"},
-      {t:'nar', text:"他望着顾璨远去的背影，攥紧了手里的瓷片。"},
-    ],
-    choices:[
-      {label:"顺应：陪他坐会儿，什么也不说", hint:"沉默的陪伴最重", fx:{benxin:1}, go:"e5a"},
-      {label:"逆反·搞事：放话‘将来我帮你把顾璨抢回来’", hint:"他笑你天真，但暖", fx:{}, go:"e5a", tag:"承诺·顾璨"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ⑤ 搬山猿重伤刘羡阳 ===== */
-  e5a:{
-    node:"⑤搬山猿重伤刘羡阳",
-    lines:[
-      {t:'nar', text:"正阳山护山供奉搬山猿进了镇，为夺刘家祖传剑经。刘羡阳死活不肯交。"},
-      {t:'say', who:"搬山猿", text:"（一拳）不肯？那便打到肯。"},
-      {t:'nar', text:"刘羡阳被砸得重伤垂死，呼吸微弱。陈平安用一片槐叶，暂时吊住他一口气。"},
-    ],
-    choices:[
-      {label:"顺应：帮陈平安照顾刘羡阳，喂药擦身", hint:"获刘羡阳信任", fx:{}, go:"e5b", tag:"刘羡阳信任"},
-      {label:"逆反·搞事：冲搬山猿骂‘有种冲我来’", hint:"它懒得理你，但你够莽", fx:{benxin:-1}, go:"e5b"},
-      {label:"观望·探索：跑去给齐先生报信", hint:"他只摇头‘此劫，避不得’", fx:{}, go:"e5b", tag:"求齐先生"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e5b:{
-    node:"⑤搬山猿重伤刘羡阳",
-    lines:[
-      {t:'nar', text:"小镇人人自危。那头大妖在镇上踱步，像在自家后院。剑经它迟早要到手。"},
-      {t:'say', who:"刘羡阳", text:"（气若游丝）嘿……别管我，去……去护着陈平安。"},
-    ],
-    choices:[
-      {label:"顺应：记下剑经可能藏的地方，等风声", hint:"情报+", fx:{}, go:"e6a", tag:"剑经线索"},
-      {label:"逆反·搞事：偷偷把剑经挖出来，想还给刘家", hint:"怀璧其罪，你成了靶子", fx:{benxin:-2}, go:"e6a", tag:"手握剑经"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ⑥ 合战搬山猿 ===== */
-  e6a:{
-    node:"⑥合战搬山猿",
-    lines:[
-      {t:'nar', text:"陈平安四处求援。宁姚放火调虎离山；风雷园刘灞桥偷袭；宋长镜改变主意，与它对了一拳。"},
-      {t:'say', who:"宁姚", text:"（剑气如月）引它去镇外，我接。"},
-      {t:'nar', text:"搬山猿扔巨石砸向陈平安。他脱衣放路上引开它，另择一路逃命——宁姚却以为他死了。"},
-    ],
-    choices:[
-      {label:"顺应：在远处观战，不添乱", hint:"活下来，看名场面", fx:{benxin:1}, go:"e6b"},
-      {label:"逆反·搞事：捡块石头砸搬山猿脚背", hint:"它分神半秒，陈平安少挨一下", fx:{benxin:-1, qixue:-2}, go:"e6b", tag:"助战"},
-      {label:"观望·探索：提前跑去告诉宁姚‘陈平安没死，在东路’", hint:"救回她的理智，避免同归于尽", fx:{}, go:"e6b", tag:"救宁姚理智"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e6b:{
-    node:"⑥合战搬山猿",
-    lines:[
-      {t:'nar', text:"关键时刻，陈平安及时出现，一把扛起宁姚撒腿就跑。搬山猿被迫换了三口真气，折寿百年，败退。"},
-      {t:'say', who:"陈平安", text:"（扛着她跑）你轻得像片叶子——以后，不许再瞎想。"},
-      {t:'nar', text:"廊桥底下，一柄生锈的老剑条，在这一刻，微微一颤。它等了八千年，等的不是你。"},
-    ],
-    choices:[
-      {label:"顺应：扶起两人，捡回那片槐叶留念", hint:"祖荫护体，短时运势+", fx:{benxin:1}, go:"e7a", tag:"槐叶护身"},
-      {label:"逆反·搞事：去廊桥底下把那剑条拔出来", hint:"它不是你的，强拔有反噬", fx:{benxin:-3, qixue:-5}, go:"e6_hurt"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e6_hurt:{
-    node:"⑥合战搬山猿",
-    lines:[
-      {t:'nar', text:"你握住廊桥底下的剑条。一股亘古的剑气顺着掌心倒灌，像冰锥扎进骨头。"},
-      {t:'nar', text:"它认主的条件，你一样都不够。剑气反噬，你吐了口血，松了手。"},
-    ],
-    choices:[
-      {label:"顺应：认栽，捂着胸口退开", hint:"捡回半条命", fx:{qixue:-3}, go:"e7a"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ⑦ 齐静春殉道 ===== */
-  e7a:{
-    node:"⑦齐静春殉道",
-    lines:[
-      {t:'nar', text:"天雷滚滚，仿佛末日。骊珠洞天三千年的天道反扑降临，小镇六千百姓面临被抹杀的灭顶之灾。"},
-      {t:'say', who:"齐静春", text:"小镇三千年的天道反扑，我齐静春，一肩挑之。"},
-      {t:'nar', text:"他身形拔地而起，顶天立地，万丈法身金光璀璨，以一己之躯化作屏障。"},
-    ],
-    choices:[
-      {label:"顺应：在学塾替他照看学童，不乱跑", hint:"他最后嘱托之一", fx:{benxin:2}, go:"e7b", tag:"齐先生嘱托"},
-      {label:"逆反·搞事：冲上去想替他分担", hint:"你被浩然之气弹开——凡人扛不住", fx:{qixue:-4}, go:"e7b", tag:"试图分担"},
-      {label:"观望·探索：远远看着那道金光，记住他的每一句话", hint:"这些话会回来找你", fx:{benxin:1}, go:"e7b"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e7b:{
-    node:"⑦齐静春殉道",
-    lines:[
-      {t:'say', who:"齐静春", text:"天下非一人之天下，乃天下人之天下。老天爷不给公道，我自己去要。"},
-      {t:'say', who:"齐静春", text:"天下有我齐静春，天下快哉，我亦快哉！"},
-      {t:'nar', text:"四位圣人先后降临，以天道之名镇压。他只守不攻，法相寸寸破碎，鲜血淋漓。"},
-    ],
-    choices:[
-      {label:"顺应：含泪喊‘先生，走好’", hint:"本心+，你记住了他", fx:{benxin:2}, go:"e7c", tag:"铭记先生"},
-      {label:"逆反·搞事：骂那四位圣人‘你们算什么公道’", hint:"你懂什么叫代价吗", fx:{benxin:-1, zuijie:3}, go:"e7c"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e7c:{
-    node:"⑦齐静春殉道",
-    lines:[
-      {t:'nar', text:"他先去了学塾、石拱桥、师弟的坟头，然后悄然走在陈平安身边——每一步，身影消散一分。"},
-      {t:'say', who:"齐静春", text:"（递出发簪）就当是离别赠礼好了。并非贵重物件，更非仙家物品，放心收下。"},
-      {t:'say', who:"齐静春", text:"陈平安，记住，以后不管遇到什么，你都不要对这个世界失去希望。"},
-      {t:'nar', text:"学塾空了。小镇百姓知道齐先生走了，哭成一片。‘遇事不决，可问春风’——春风，是他留的一缕。"},
-    ],
-    choices:[
-      {label:"顺应：替陈平安把那支发簪收好", hint:"托付，过命", fx:{benxin:1}, go:"e8a", tag:"先生遗物"},
-      {label:"逆反·搞事：问春风‘先生回来了吗’（无人应）", hint:"你怅然", fx:{benxin:-1}, go:"e8a"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ⑧ 洞天破碎坠地 ===== */
-  e8a:{
-    node:"⑧洞天破碎坠地",
-    lines:[
-      {t:'nar', text:"阵法崩解，骊珠洞天从悬浮坠落，降格为骊珠福地。天象异变，飞禽走兽在边界外盘踞。"},
-      {t:'nar', text:"披云山以肉眼可见的速度升高；老槐树井水干涸、槐树倾倒，镇民砍它回家当柴火。"},
-      {t:'nar', text:"杨老头的天井里，一炷香忽然熊熊燃烧——万年赌局，开盘了。你身边的孩子，有人眼神悄悄变了。"},
-    ],
-    choices:[
-      {label:"顺应：帮陈平安捡槐叶槐木，留个念想", hint:"祖荫+，灵气+", fx:{benxin:1, lingqi:4}, go:"e8b", tag:"槐木念想"},
-      {label:"逆反·搞事：趁乱去抢一块发光的碎瓷", hint:"机缘，也可能是祸", fx:{benxin:-2}, go:"e8b", tag:"夺机缘"},
-      {label:"观望·探索：盯着谁‘眼神变了’，记下来", hint:"神性苏醒的痕迹", fx:{}, go:"e8b", tag:"观神性"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  e8b:{
-    node:"⑧洞天破碎坠地",
-    lines:[
-      {t:'nar', text:"阮邛继任圣人，出手震慑所有窥探者。小镇落地生根，成了大梁国境内一座普通的福地小镇。"},
-      {t:'say', who:"阮秀", text:"（递来一条小鱼）给，溪边刚捞的。我……最遗憾就是不会打架。"},
-      {t:'nar', text:"你接过鱼。有些话，她自己还不知道——比如她体内睡着的那团火。"},
-    ],
-    choices:[
-      {label:"顺应：把鱼烤了，分她一半", hint:"邻家姐姐线+，功德+", fx:{benxin:1, gongde:2}, go:"e9a", tag:"阮秀线"},
-      {label:"逆反·搞事：追问‘你身上那团火是什么’", hint:"她茫然，你吓到自己", fx:{}, go:"e9a"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== ⑨ 背剑离开 ===== */
-  e9a:{
-    node:"⑨背剑离开",
-    lines:[
-      {t:'nar', text:"你收拾行囊，走出东门。回头看小镇最后一眼——泥瓶巷、杏花巷、骑龙巷，都小得像玩具。"},
-      {t:'say', who:"陈平安", text:"走了。山水有相逢。"},
-      {t:'nar', text:"前方是山外山、人外人。不是终点，是开始。"},
-    ],
-    choices:[
-      {label:"顺应：随陈平安一行南下，护送李宝瓶去山崖书院", hint:"出镇后主线开启", fx:{}, go:"post1"},
-      {label:"逆反·搞事：独自闯荡，谁也不跟", hint:"自由最高，也最险", fx:{benxin:-1}, go:"post_roam"},
-      {label:"观望·探索：留在小镇，帮阮邛重建铁匠铺", hint:"安稳，但错过江湖", fx:{}, go:"post_stay"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-
-  /* ===== 出镇后 ===== */
-  post1:{
-    node:"出镇后·护送李宝瓶",
-    lines:[
-      {t:'nar', text:"南下的路上，你们遇着个邋遢剑客——歪戴斗笠，斜挎酒葫芦，牵着一头白驴。"},
-      {t:'say', who:"阿良", text:"我叫阿良，善良的良，我是一名剑客。"},
-      {t:'nar', text:"他传了陈平安一套‘剑气十八停’。城头刻‘猛’字的那一战，还在后头。"},
-    ],
-    choices:[
-      {label:"顺应：听阿良讲剑，记一停是一停", hint:"剑道启蒙，剑意+", fx:{benxin:1, jianyi:8, lingqi:3}, go:"post2", tag:"剑气十八停"},
-      {label:"逆反·搞事：跟阿良拼酒", hint:"你醉了，他笑你菜", fx:{benxin:-1, qixue:-2}, go:"post2"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  post2:{
-    node:"出镇后·秋鹿客栈",
-    lines:[
-      {t:'nar', text:"秋鹿客栈，一个油嘴滑舌的少年被‘剑气洗头’——洗去渣滓，成了落魄山最忠诚的大师兄。"},
-      {t:'say', who:"崔东山", text:"愿先生心境四季如春。"},
-      {t:'nar', text:"你远远看着这出闹剧。世界很大，故事才刚翻开第一页。"},
-    ],
-    choices:[
-      {label:"顺应：向陈平安拜师，做落魄山一份子", hint:"阵营锁定·落魄山", fx:{benxin:1}, go:"post_roam", tag:"落魄山"},
-      {label:"逆反·搞事：偏不拜师，要去剑气长城看看", hint:"你走向宁姚的方向", fx:{}, go:"post_roam", tag:"剑气长城线"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  post_stay:{
-    node:"出镇后·留守小镇",
-    lines:[
-      {t:'nar', text:"你留下，帮阮邛把铁匠铺重新支起来。小镇平静得像什么都没发生过。"},
-      {t:'nar', text:"只是偶尔，你会想起那个莲花冠道士的话——‘命里八尺，莫求一丈’。"},
-    ],
-    choices:[
-      {label:"顺应：安心打铁，过烟火日子", hint:"安稳结局", fx:{benxin:1}, go:"post_roam", tag:"铁匠归宿"},
-      {label:"逆反·搞事：某天还是背起包袱出了东门", hint:"你终究是江湖人", fx:{}, go:"post_roam"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]
-  },
-  post_roam:{
-    node:"出镇后·漫游",
-    lines:[
-      {t:'nar', text:"世界还在转。剑气长城的风雪、书简湖的恩怨、蛮荒的战鼓……都在前面。"},
-      {t:'nar', text:"你走在自己的路上。这一局，没有标准答案。"},
-    ],
-    choices:[
-      {label:"顺应：继续闯荡，遇山开山", hint:"主线惯性推进", fx:{benxin:1}, go:"post_roam"},
-      {label:"逆反·搞事：去书简湖找刘志茂算总账", hint:"你已非吴下阿蒙，但仍是险棋", fx:{benxin:-1}, go:"post_roam", tag:"书简湖恩怨"},
-      {label:"观望·探索：去剑气长城，远远看宁姚练剑", hint:"剑光如月", fx:{}, go:"post_roam", tag:"宁姚练剑"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-      {label:"回望此生，做个了结（结算结局）", hint:"走到这儿，你已挣出自己的一世", fx:{}, go:"__ending__"},
-    ]
-  },
-};
-
-/* ================= 随机事件池 ================= */
-const RANDOM = {
-  r_caiping:{ name:"陈平安采药",
-    lines:[
-      {t:'nar', text:"陈平安上山采药，背篓压弯了腰。他冲你招手：‘来，我教你认黄精。’"},
-    ],
-    choices:[
-      {label:"跟去，学认一味药", hint:"采药经验+", fx:{benxin:1}, go:"__return__", tag:"采药"},
-      {label:"偷懒，树下打盹", hint:"轻松，但错过机缘", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_song:{ name:"宋集薪蹲墙头",
-    lines:[
-      {t:'nar', text:"宋集薪蹲在墙头上，把玩一块蛇胆石，阴阳怪气：‘你还记得正月里的那条四脚蛇吗？’"},
-    ],
-    choices:[
-      {label:"陪他胡扯两句", hint:"邻居交情+", fx:{}, go:"__return__", tag:"宋集薪"},
-      {label:"追问‘四脚蛇’是什么", hint:"他笑你不识货", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_gucan:{ name:"顾璨钓黄鳝",
-    lines:[
-      {t:'nar', text:"顾璨撅着屁股在沟边钓黄鳝，半天没动静，急得满头汗。"},
-    ],
-    choices:[
-      {label:"陪他等大半天", hint:"他记你好", fx:{}, go:"__return__", tag:"顾璨"},
-      {label:"帮他吓一吓水里的黄鳝", hint:"收获+，关系+", fx:{benxin:1}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_ruanxiu:{ name:"阮秀偷吃糕点",
-    lines:[
-      {t:'nar', text:"阮秀偷吃糕点被你撞见，脸一红，塞给你一块：‘别告诉我爹。’"},
-    ],
-    choices:[
-      {label:"接过来，帮她望风", hint:"邻家姐姐线+", fx:{benxin:1}, go:"__return__", tag:"阮秀"},
-      {label:"逗她‘告状的报酬呢’", hint:"她作势要打", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_zhigui:{ name:"稚圭赶集",
-    lines:[
-      {t:'nar', text:"怯弱的婢女稚圭独自赶集，杏眼圆睁像受惊的麋鹿，你搭话她先怯了半步。"},
-    ],
-    choices:[
-      {label:"温和地递她一只竹蜻蜓", hint:"她破涕为笑", fx:{benxin:1}, go:"__return__", tag:"稚圭"},
-      {label:"多问两句她的来历", hint:"她闭口不谈", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_yang:{ name:"杨老头看你",
-    lines:[
-      {t:'nar', text:"杨老头在药铺门口看你，旱烟袋一明一灭：‘呼吸要匀，脚步要稳。’"},
-    ],
-    choices:[
-      {label:"规规矩矩行个礼", hint:"他几不可察地点头", fx:{benxin:1}, go:"__return__", tag:"杨老头"},
-      {label:"问‘您到底是何方神圣’", hint:"他笑而不答", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_zheng:{ name:"郑大风打盹",
-    lines:[
-      {t:'nar', text:"小镇看门人郑大风在镇口打盹，见谁都装穷，嘴里念叨‘欠陈平安五文钱’。"},
-    ],
-    choices:[
-      {label:"替他赶走脸前苍蝇", hint:"他迷糊道谢", fx:{}, go:"__return__", tag:"郑大风"},
-      {label:"问他‘你到底是几境’", hint:"他装睡不答", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_conflict:{ name:"外乡修士推老人",
-    lines:[
-      {t:'nar', text:"集市上，一个外乡修士不耐烦地推倒了挑水的老人，周围人噤声。"},
-    ],
-    choices:[
-      {label:"顺应：扶起老人，报告齐先生", hint:"稳妥，本心+", fx:{benxin:2}, go:"__return__", tag:"护老"},
-      {label:"逆反·搞事：冲上去理论", hint:"你可能被修士记住", fx:{benxin:-1}, go:"__return__", tag:"出头"},
-      {label:"观望·探索：记下修士样貌，不声张", hint:"情报+", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_gucan_bully:{ name:"顾璨被欺负",
-    lines:[
-      {t:'nar', text:"几个大孩子抢顾璨的吃食，他咬着牙不哭。"},
-    ],
-    choices:[
-      {label:"帮他夺回", hint:"关系大涨", fx:{benxin:1}, go:"__return__", tag:"护顾璨"},
-      {label:"去找陈平安摇人", hint:"陈平安必到", fx:{}, go:"__return__", tag:"陈平安摇人"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_omen:{ name:"异动·井水变甜",
-    lines:[
-      {t:'nar', text:"铁锁井的水一夜变甜——懂行的人知道，这是龙气外泄的征兆。"},
-    ],
-    choices:[
-      {label:"打一桶尝尝，记在心里", hint:"感知+", fx:{benxin:1}, go:"__return__", tag:"龙气征兆"},
-      {label:"不当回事", hint:"你还是太年轻", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_sword:{ name:"异动·廊桥剑鸣",
-    lines:[
-      {t:'nar', text:"廊桥底下，传来极轻的剑鸣——像睡了八千年的东西，翻了个身。"},
-    ],
-    choices:[
-      {label:"驻足听，不敢靠近", hint:"敬畏，本心+", fx:{benxin:1}, go:"__return__", tag:"剑鸣"},
-      {label:"想下去看看", hint:"被一股寒意劝退", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_luchen:{ name:"陆沉招手",
-    lines:[
-      {t:'nar', text:"陆沉冲你招手：‘小友，来，我给你看看手相，不收钱。’"},
-    ],
-    choices:[
-      {label:"伸手让他看", hint:"他笑‘命里八尺’", fx:{benxin:1}, go:"__return__", tag:"陆沉手相"},
-      {label:"跑开，怕被算计", hint:"他哈哈大笑", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_li2:{ name:"李二卖鱼",
-    lines:[
-      {t:'nar', text:"溪边卖鱼的李二，看着你长大，多塞给你一条：‘拿去，别让你爹知道。’"},
-    ],
-    choices:[
-      {label:"接下，道声谢", hint:"长辈温情+", fx:{benxin:1}, go:"__return__", tag:"李二"},
-      {label:"嫌小，想换条大的", hint:"他笑你精", fx:{}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_ma:{ name:"马苦玄找茬",
-    lines:[
-      {t:'nar', text:"杏花巷的马苦玄龇牙咧嘴拦你：‘听说你跟陈平安玩得好？他爹，可是被我爹……’他没说完，眼神却狠。"},
-    ],
-    choices:[
-      {label:"不接话，绕开", hint:"避其锋芒", fx:{}, go:"__return__", tag:"马苦玄"},
-      {label:"顶回去‘陈平安的爹，与你何干’", hint:"埋下一生之敌", fx:{benxin:-1}, go:"__return__", tag:"结怨·马苦玄"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_rain:{ name:"天灾·暴雨",
-    lines:[
-      {t:'nar', text:"连日暴雨，泥瓶巷积水半尺。水混着泥，漫进你家门槛。"},
-    ],
-    choices:[
-      {label:"趁雨小，去帮顾璨娘抢水修缮", hint:"关系大涨，可能受寒", fx:{benxin:2, qixue:-2}, go:"__return__", tag:"暴雨抢水"},
-      {label:"关门窗，裹紧被子熬过去", hint:"保命，但错过", fx:{qixue:-1}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-  r_post_jing:{ name:"出镇后·残页", if:"left",
-    lines:[
-      {t:'nar', text:"山野里，你拾得一页剑经残页，墨迹古旧。远处似有妖气掠过。"},
-    ],
-    choices:[
-      {label:"收好残页，远观妖气", hint:"机缘+，谨慎", fx:{benxin:1}, go:"__return__", tag:"剑经残页"},
-      {label:"追上去看妖长什么样", hint:"作死边缘", fx:{benxin:-2, qixue:-3}, go:"__return__"},
-      {label:"自由行动", hint:"", fx:{}, go:"__free__"},
-    ]},
-};
-const RANDOM_KEYS = Object.keys(RANDOM);
-
-/* ================= 引擎 ================= */
-/* ================= 音频引擎 + 视觉反馈 ================= */
-/* 内置音乐为 Web Audio 实时合成的「古风国风」旋律（五声音阶），
-   非剑来动漫原声（原声为商业版权，不内置，避免下架风险）。
-   想换成你自己的授权 mp3：把文件放到 public/jianlai/music/ 下，并在 USER_MUSIC 写好路径即可。 */
-const AUDIO_SETTINGS = {
-  musicOn: localStorage.getItem("jl_music")!=="0",
-  sfxOn:   localStorage.getItem("jl_sfx")!=="0",
-};
-// 留 null = 使用内置合成乐；写上路径如 calm:"music/calm.mp3" 则用你的曲子
-const USER_MUSIC = { calm:null, tense:null, mystery:null, warm:null, grand:null, sorrow:null };
-
-const Audio = (function(){
-  let ctx=null, master=null, musicGain=null, sfxGain=null, comp=null, delay=null, delayGain=null;
-  let mood="calm", running=false, timer=null, step=0, userEl=null, useUser=false;
-  const PENT=[0,2,4,7,9]; // 宫商角徵羽
-  function freq(deg,oct){ const base=220; const s=PENT[((deg%5)+5)%5]+12*Math.floor(deg/5)+12*oct; return base*Math.pow(2,s/12); }
-  function ensure(){
-    if(ctx) return;
-    try{
-      ctx=new (window.AudioContext||window.webkitAudioContext)();
-      comp=ctx.createDynamicsCompressor();
-      master=ctx.createGain(); master.gain.value=0.9; master.connect(comp); comp.connect(ctx.destination);
-      musicGain=ctx.createGain(); musicGain.gain.value=AUDIO_SETTINGS.musicOn?0.30:0.0001; musicGain.connect(master);
-      sfxGain=ctx.createGain(); sfxGain.gain.value=AUDIO_SETTINGS.sfxOn?0.55:0.0001; sfxGain.connect(master);
-      delay=ctx.createDelay(); delay.delayTime.value=0.23; delayGain=ctx.createGain(); delayGain.gain.value=0;
-      delay.connect(delayGain); delayGain.connect(master);
-    }catch(e){ ctx=null; }
-  }
-  function resume(){ if(ctx&&ctx.state==="suspended") ctx.resume(); }
-  function tone(f,t,dur,opt){
-    if(!ctx) return; opt=opt||{};
-    const o=ctx.createOscillator(), g=ctx.createGain();
-    o.type=opt.type||"sine"; o.frequency.value=f; if(opt.detune) o.detune.value=opt.detune;
-    const peak=opt.gain==null?0.3:opt.gain, atk=opt.attack==null?0.01:opt.attack, rel=opt.release==null?0.18:opt.release;
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+atk); g.gain.exponentialRampToValueAtTime(0.0001,t+dur+rel);
-    o.connect(g); g.connect(opt.bus||musicGain); if(opt.space) g.connect(delay);
-    o.start(t); o.stop(t+dur+rel+0.05);
-  }
-  function noise(t,dur,opt){
-    if(!ctx) return; opt=opt||{};
-    const n=Math.floor(ctx.sampleRate*dur), buf=ctx.createBuffer(1,n,ctx.sampleRate), d=buf.getChannelData(0);
-    for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
-    const src=ctx.createBufferSource(); src.buffer=buf;
-    const g=ctx.createGain(); g.gain.value=opt.gain==null?0.3:opt.gain;
-    const f=ctx.createBiquadFilter(); f.type=opt.filter||"lowpass"; f.frequency.value=opt.cutoff||1400;
-    src.connect(f); f.connect(g); g.connect(sfxGain); src.start(t); src.stop(t+dur);
-  }
-  const MOODS={
-    calm:    {tempo:540, oct:0,  wave:"sine",     voice:"pad",   mel:[0,2,1,-1,3,2,4,-1,3,2,1,-1,2,0,-1,-1], bass:[0,-1,-1,0]},
-    warm:    {tempo:500, oct:1,  wave:"triangle", voice:"pad",   mel:[4,3,2,4,3,2,1,2,0,1,2,3,2,1,-1,-1],       bass:[0,-1,0,-1]},
-    tense:   {tempo:300, oct:0,  wave:"sawtooth", voice:"pluck", mel:[0,0,3,3,4,4,2,2,0,0,5,5,4,3,2,1],         bass:[0,-1,0,-1]},
-    mystery: {tempo:640, oct:0,  wave:"sine",     voice:"pad", space:true, mel:[0,-1,3,-1,4,-1,2,-1,5,-1,3,-1,1,-1,0,-1], bass:[]},
-    grand:   {tempo:440, oct:0,  wave:"triangle", voice:"pad", space:true, mel:[0,2,4,3,4,5,4,2,3,4,5,4,2,1,0,-1], bass:[0,-1,-1,0]},
-    sorrow:  {tempo:700, oct:-1, wave:"sine",     voice:"pad",   mel:[2,1,0,-1,3,2,1,-1,0,-1,-1,-1,2,1,0,-1],   bass:[]},
-  };
-  function playStep(){
-    if(!running||!ctx) return;
-    const m=MOODS[mood]||MOODS.calm, now=ctx.currentTime+0.02, dur=m.tempo/1000*0.9;
-    if(useUser){ step++; return; }
-    const idx=step%m.mel.length, note=m.mel[idx];
-    if(note>=0){
-      const f=freq(note,m.oct);
-      if(m.voice==="pluck") tone(f,now,dur*0.5,{type:m.wave,gain:0.20,attack:0.005,release:0.12});
-      else tone(f,now,dur,{type:m.wave,gain:0.17,attack:0.06,release:0.28,space:m.space});
+function updateUI() {
+  if(!gameState) return;
+  document.getElementById('player-name-display').textContent = gameState.name;
+  document.getElementById('realm-display').textContent = Engine.getRealmName();
+  document.getElementById('time-display').textContent = Engine.getTimeDisplay();
+  document.getElementById('weather-display').textContent = Engine.getWeatherDisplay();
+  const locNames = {nipingxiang:'泥瓶巷',academy:'学塾',blacksmith:'铁匠铺',pharmacy:'杨家药铺',town_gate:'镇口',mountain_temple:'山神庙',sword_wall:'剑气长城',lake:'书简湖',lotus:'藕花福地',barbarian:'蛮荒天下',shuyang:'肃阳书院'};
+  document.getElementById('location-display').textContent = '📍 ' + (locNames[Engine.state.location]||'');
+  
+  const bgMap = {nipingxiang:'nipingxiang.jpg',academy:'academy.jpg',blacksmith:'blacksmith.jpg',pharmacy:'pharmacy.jpg',town_gate:'town_gate.jpg',mountain_temple:'temple.jpg',sword_wall:'swordwall.jpg',lake:'lake.jpg',lotus:'lotus.jpg',barbarian:'barbarian.jpg',shuyang:'shuyang.jpg'};
+  const bgFile = bgMap[Engine.state.location];
+  if(bgFile) document.getElementById('bg-layer').style.backgroundImage = "url('images/"+bgFile+"')";
+  
+  const s=gameState.stats;
+  document.getElementById('stats-quick').innerHTML = `
+    <div style="display:flex;justify-content:space-between"><span>体魄</span><span style="color:#9a4a4a">${s.body}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>灵气</span><span style="color:#4a7a9a">${s.qi}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>剑意</span><span style="color:#7a7a7a">${s.swordIntent}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>悟性</span><span style="color:#6a5a3a">${s.wuxing}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>根骨</span><span style="color:#5a7a5a">${s.rootbone}</span></div>
+  `;
+  document.getElementById('dao-heart-val').textContent = s.daoHeart;
+  document.getElementById('dao-heart-bar').style.width = s.daoHeart+'%';
+  document.getElementById('demon-val').textContent = s.demon;
+  document.getElementById('demon-bar').style.width = s.demon+'%';
+  
+  // 关系快捷栏
+  let relHtml = '';
+  const chars = gameState.characters;
+  let count=0;
+  for(let cid in chars) {
+    if(count>=3) break;
+    const char = window.CHARACTERS && CHARACTERS[cid];
+    if(char) {
+      const tier = Engine.getRelationshipTier(cid);
+      relHtml += `<div style="display:flex;justify-content:space-between;padding:2px 0"><span>${char.name}</span><span style="color:${chars[cid].disposition>=30?'var(--ink-green)':chars[cid].disposition>=10?'var(--ink-gold)':'var(--ink-gray)'}">${tier}</span></div>`;
+      count++;
     }
-    if(m.bass&&m.bass.length){
-      const bi=step%m.bass.length, bn=m.bass[bi];
-      if(bn!==undefined&&bn>=0) tone(freq(bn,m.oct-2),now,dur*1.7,{type:"sine",gain:0.15,attack:0.04,release:0.5});
-    }
-    step++;
   }
-  function loop(){ if(!running) return; playStep(); timer=setTimeout(loop,(MOODS[mood]||MOODS.calm).tempo); }
-  function startUserTrack(m){
-    stopUserTrack();
-    if(!AUDIO_SETTINGS.musicOn || !USER_MUSIC[m]){ useUser=false; return; }
-    try{
-      userEl=document.createElement("audio"); userEl.src=USER_MUSIC[m]; userEl.loop=true; userEl.volume=0.5;
-      userEl.play().catch(function(){}); useUser=true;
-    }catch(e){ useUser=false; }
-  }
-  function stopUserTrack(){ if(userEl){ try{userEl.pause();userEl.currentTime=0;}catch(e){} userEl=null; } useUser=false; }
-  function refreshUser(){ if(USER_MUSIC[mood] && AUDIO_SETTINGS.musicOn) startUserTrack(mood); else stopUserTrack(); }
-  function startMusic(){ ensure(); resume(); if(!ctx) return; if(running){ refreshUser(); return; } running=true; refreshUser(); loop(); }
-  function setMood(m){ if(!m||m===mood){ mood=m||mood; return; } mood=m; if(running) refreshUser(); }
-  function setMusicGain(v){ if(musicGain) musicGain.gain.setTargetAtTime(v?0.30:0.0001, ctx.currentTime, 0.05); }
-  function setSfxGain(v){ if(sfxGain) sfxGain.gain.setTargetAtTime(v?0.55:0.0001, ctx.currentTime, 0.05); }
-  function sfx(name){
-    ensure(); resume(); if(!ctx) return;
-    const t=ctx.currentTime+0.01;
-    if(name==="ui"){ tone(880,t,0.05,{type:"sine",gain:0.18,attack:0.005,release:0.05,bus:sfxGain}); }
-    else if(name==="good"){ tone(523,t,0.12,{type:"triangle",gain:0.25,bus:sfxGain}); tone(784,t+0.10,0.16,{type:"triangle",gain:0.25,bus:sfxGain}); }
-    else if(name==="bad"){ tone(196,t,0.16,{type:"sawtooth",gain:0.18,cutoff:900,attack:0.005,release:0.2,bus:sfxGain}); tone(147,t+0.10,0.20,{type:"sawtooth",gain:0.18,bus:sfxGain}); }
-    else if(name==="levelup"){ [523,659,784,1047].forEach(function(f,i){ tone(f,t+i*0.07,0.18,{type:"triangle",gain:0.22,bus:sfxGain}); }); tone(1568,t+0.30,0.4,{type:"sine",gain:0.12,bus:sfxGain}); }
-    else if(name==="hit"){ noise(t,0.18,{gain:0.35,cutoff:1600}); tone(90,t,0.22,{type:"square",gain:0.25,bus:sfxGain}); }
-    else if(name==="reveal"){ tone(330,t,0.5,{type:"sine",gain:0.18,attack:0.2,release:0.5,bus:sfxGain}); tone(392,t,0.5,{type:"sine",gain:0.15,attack:0.25,release:0.5,bus:sfxGain}); tone(277,t,0.6,{type:"sine",gain:0.16,attack:0.3,release:0.6,bus:sfxGain,space:true}); }
-    else if(name==="death"){ [440,392,330,294,220].forEach(function(f,i){ tone(f,t+i*0.22,0.7,{type:"sine",gain:0.2,attack:0.05,release:0.6,bus:sfxGain}); }); }
-    else if(name==="endingGood"){ [523,659,784,1047,1319].forEach(function(f,i){ tone(f,t+i*0.09,0.5,{type:"triangle",gain:0.2,bus:sfxGain,space:true}); }); [262,330,392].forEach(function(f){ tone(f,t+0.4,1.4,{type:"sine",gain:0.14,bus:sfxGain}); }); }
-    else if(name==="endingBad"){ [330,294,247,196].forEach(function(f,i){ tone(f,t+i*0.18,0.9,{type:"sine",gain:0.2,attack:0.05,release:0.7,bus:sfxGain}); }); }
-  }
-  function toggleMusic(){ AUDIO_SETTINGS.musicOn=!AUDIO_SETTINGS.musicOn; localStorage.setItem("jl_music",AUDIO_SETTINGS.musicOn?"1":"0"); setMusicGain(AUDIO_SETTINGS.musicOn); if(AUDIO_SETTINGS.musicOn){ ensure(); resume(); refreshUser(); if(!running){ running=true; loop(); } } return AUDIO_SETTINGS.musicOn; }
-  function toggleSfx(){ AUDIO_SETTINGS.sfxOn=!AUDIO_SETTINGS.sfxOn; localStorage.setItem("jl_sfx",AUDIO_SETTINGS.sfxOn?"1":"0"); setSfxGain(AUDIO_SETTINGS.sfxOn); return AUDIO_SETTINGS.sfxOn; }
-  return { startMusic:startMusic, setMood:setMood, sfx:sfx, toggleMusic:toggleMusic, toggleSfx:toggleSfx, isMusicOn:function(){return AUDIO_SETTINGS.musicOn;}, isSfxOn:function(){return AUDIO_SETTINGS.sfxOn;} };
-})();
-
-/* 视觉反馈特效 */
-const FX={
-  flash:function(dir){
-    const d=document.createElement("div"); d.className="fx-flash "+(dir==="up"?"up":"down");
-    document.body.appendChild(d); requestAnimationFrame(function(){ d.style.opacity="1"; });
-    setTimeout(function(){ d.style.opacity="0"; },220);
-    setTimeout(function(){ d.remove(); },600);
-  },
-  shake:function(){ const a=document.getElementById("app"); if(!a) return; a.classList.add("fx-shake"); setTimeout(function(){ a.classList.remove("fx-shake"); },420); },
-  glow:function(){ const d=document.createElement("div"); d.className="fx-glow"; document.body.appendChild(d); setTimeout(function(){ d.remove(); },950); },
-  vignette:function(){ const d=document.createElement("div"); d.className="fx-vignette"; document.body.appendChild(d); setTimeout(function(){ d.remove(); },2600); },
-};
-function pickMood(pos){
-  if(!pos) return "calm";
-  if(pos.startsWith("RAND:")){
-    const nm=RANDOM[pos.slice(5)]?RANDOM[pos.slice(5)].name:"";
-    if(/异动|天灾|残页/.test(nm)) return "mystery";
-    if(/推老人|找茬|被欺负/.test(nm)) return "tense";
-    return "warm";
-  }
-  const b=BEATS[pos]; const node=b?b.node:"";
-  if(/殉道|背剑离开/.test(node)) return "grand";
-  if(/断长生桥|重伤|合战/.test(node)) return "tense";
-  if(/宁姚入镇/.test(node)) return "warm";
-  if(/被带走|外乡人涌入/.test(node)) return "tense";
-  if(/洞天破碎/.test(node)) return "mystery";
-  if(/出镇后/.test(node)) return "warm";
-  return "calm";
-}
-function audioToggleHTML(){ return '<button class="btn" id="bMusic">'+(Audio.isMusicOn()?'♪乐:开':'♪乐:关')+'</button><button class="btn" id="bSfx">'+(Audio.isSfxOn()?'♪效:开':'♪效:关')+'</button>'; }
-function bindAudioToggles(){
-  const m=document.getElementById("bMusic"), s=document.getElementById("bSfx");
-  if(m) m.onclick=function(){ const on=Audio.toggleMusic(); m.textContent=on?'♪乐:开':'♪乐:关'; };
-  if(s) s.onclick=function(){ const on=Audio.toggleSfx(); s.textContent=on?'♪效:开':'♪效:关'; };
+  if(!relHtml) relHtml = '<div style="color:var(--ink-gray)">暂无接触</div>';
+  document.getElementById('rels-quick').innerHTML = relHtml;
+  
+  // 昼夜
+  const timeClass = gameState.time>=6&&gameState.time<12?'time-day':gameState.time>=12&&gameState.time<18?'time-day':gameState.time>=18&&gameState.time<20?'time-dusk':gameState.time>=4&&gameState.time<6?'time-dawn':'time-night';
+  document.body.className = timeClass + ' weather-' + gameState.weather;
 }
 
-/* ================= 核心体系：昼夜 / 天气 / 场景 / 心魔 ================= */
-function recomputeXinmo(s){
-  const z=s.zuijie||0, b=s.benxin||0, g=s.gongde||0;
-  s.xinmo = clamp(Math.round(z*0.7 + Math.max(0,45-b)*0.6 - g*0.3), 0, 100);
-  return s.xinmo;
-}
-function ensureAttrs(s){
-  if(s.tupo==null) s.tupo=40;
-  if(s.lingqi==null) s.lingqi=30;
-  if(s.jianyi==null) s.jianyi=0;
-  if(s.wuxing==null) s.wuxing=45;
-  if(s.gengu==null) s.gengu=45;
-  if(s.gongde==null) s.gongde=15;
-  if(s.zuijie==null) s.zuijie=0;
-  if(s.shengwang==null) s.shengwang=10;
-  if(s.path==null) s.path="散修";
-  if(s.shichen==null) s.shichen=4;
-  if(s.weather==null) s.weather="晴";
-  if(s.scene==null) s.scene="lizhu";
-  recomputeXinmo(s);
-}
-/* 时间推进：每次进入真实节点推进 1~2 时辰；偶尔变天 */
-function advanceTime(){
-  state.shichen = (state.shichen + (1 + Math.floor(Math.random()*2))) % 12;
-  if(Math.random()<0.18){
-    state.weather = WEATHER[Math.floor(Math.random()*WEATHER.length)];
-  } else if(state.weather==="雨" && state.shichen>=10 && Math.random()<0.3){
-    state.weather="雷";
-  } else if(state.weather==="雷" && Math.random()<0.4){
-    state.weather="雨";
-  }
-}
-function pickScene(pos){
-  if(pos && pos.startsWith("RAND:")){
-    const nm = RANDOM[pos.slice(5)] ? RANDOM[pos.slice(5)].name : "";
-    if(/残页|剑经/.test(nm)) return "shujian";
-    if(/井水|剑鸣|异动/.test(nm)) return "lizhu";
-    if(/暴雨|天灾/.test(nm)) return "niping";
-    return "niping";
-  }
-  const b = BEATS[pos]; const node = b?b.node:"";
-  if(/序|外乡人涌入/.test(node)) return "lizhu";
-  if(/宁姚入镇|顾璨被带走|搬山猿重伤|合战搬山猿|齐静春殉道|断长生桥|洞天破碎/.test(node)) return "niping";
-  if(/背剑离开|护送李宝瓶|秋鹿客栈/.test(node)) return "shuyuan";
-  if(/留守小镇/.test(node)) return "niping";
-  if(/出镇后/.test(node)){
-    if(has("剑气长城线")) return "changcheng";
-    if(has("书简湖恩怨")) return "shujian";
-    if(has("宁姚练剑")) return "changcheng";
-    const pool=["changcheng","shujian","ouhua","manhuang"];
-    return pool[(state.round||0)%pool.length];
-  }
-  return "lizhu";
-}
-/* 水墨场景 SVG（克制光影，拒绝浮夸） */
-function inkSceneSVG(scene, phase){
-  const sky = {
-    "dawn":["#3a3550","#b98a6a"], "day":["#9fb0bf","#e8e2d2"], "dusk":["#5a3b4a","#d98a4e"],
-    "night":["#0c1322","#1a2740"], "night-end":["#1a2238","#4a3b5a"]
-  }[phase] || ["#9fb0bf","#e8e2d2"];
-  const night = (phase==="night"||phase==="night-end");
-  const c1 = night?"#0a0f18":"#262626";
-  const c2 = night?"#141d2e":"#565656";
-  const c3 = night?"#1d2a40":"#8a8a8a";
-  let motif="";
-  if(scene==="lizhu") motif = `<ellipse cx="500" cy="432" rx="240" ry="34" fill="${c2}" opacity=".5"/><rect x="468" y="360" width="64" height="62" fill="${c1}"/><path d="M468 360 L500 326 L532 360 Z" fill="${c1}"/>`;
-  else if(scene==="niping") motif = `<g fill="${c1}" opacity=".72">${[120,260,420,600,760,900].map((x,i)=>`<rect x="${x}" y="${360-(i%2)*12}" width="84" height="74"/><path d="M${x} ${360-(i%2)*12} l42 -30 l42 30 Z"/>`).join("")}</g>`;
-  else if(scene==="changcheng") motif = `<rect x="0" y="384" width="1000" height="44" fill="${c1}"/><g fill="${c1}">${Array.from({length:25},(_,i)=>`<rect x="${i*42}" y="360" width="30" height="24"/><rect x="${i*42-3}" y="348" width="36" height="14"/>`).join("")}</g><circle cx="500" cy="328" r="5" fill="#cdd6e0"/>`;
-  else if(scene==="shujian") motif = `<rect x="0" y="402" width="1000" height="98" fill="${c3}" opacity=".45"/><g stroke="${c1}" opacity=".4">${[440,470,500,540,800].map(x=>`<line x1="${x}" y1="412" x2="${x}" y2="490"/>`).join("")}</g><path d="M0 402 Q500 382 1000 402" stroke="${c1}" fill="none" opacity=".5"/>`;
-  else if(scene==="shuyuan") motif = `<g fill="${c1}">${[300,560].map(x=>`<rect x="${x}" y="350" width="124" height="82"/><path d="M${x-22} 350 Q${x+62} 298 ${x+146} 350 Z"/>`).join("")}</g><rect x="470" y="300" width="8" height="132" fill="${c1}"/><path d="M458 300 L492 278 L502 300 Z" fill="#b5462f"/>`;
-  else if(scene==="ouhua") motif = `<rect x="0" y="402" width="1000" height="98" fill="${c3}" opacity=".45"/>${[200,400,600,800].map(x=>`<ellipse cx="${x}" cy="432" rx="42" ry="14" fill="${c2}" opacity=".6"/><circle cx="${x}" cy="420" r="10" fill="#d98aa0" opacity=".8"/>`).join("")}`;
-  else if(scene==="manhuang") motif = `<g fill="${c1}">${[150,500,820].map((x,i)=>`<path d="M${x-130} 442 L${x} ${300-i*22} L${x+130} 442 Z"/>`).join("")}</g><circle cx="500" cy="300" r="40" fill="none" stroke="#b5462f" opacity=".5"/>`;
-  const celestial = night
-    ? `<circle cx="800" cy="118" r="46" fill="#e8e6d8" opacity=".85"/><circle cx="822" cy="108" r="46" fill="${sky[1]}" opacity=".5"/>`
-    : `<circle cx="800" cy="116" r="50" fill="#f3e2b0" opacity=".9"/>`;
-  return `<svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">
-    <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
-    <rect width="1000" height="500" fill="url(#sky)"/>
-    ${celestial}
-    <path d="M0 318 L160 248 L320 300 L500 228 L700 290 L860 238 L1000 298 L1000 500 L0 500 Z" fill="${c3}" opacity=".55"/>
-    <path d="M0 380 L200 318 L420 370 L640 308 L860 360 L1000 328 L1000 500 L0 500 Z" fill="${c2}" opacity=".7"/>
-    <path d="M0 442 L240 400 L480 442 L760 394 L1000 442 L1000 500 L0 500 Z" fill="${c1}"/>
-    ${motif}
-    <rect width="1000" height="500" fill="#000" opacity=".06"/>
-  </svg>`;
-}
-function renderScene(){
-  let el = document.getElementById("scene-bg");
-  if(!el){ el=document.createElement("div"); el.id="scene-bg"; document.body.insertBefore(el, document.body.firstChild); }
-  const sc = state ? state.scene : "lizhu";
-  const ph = state ? shichenPhase(state.shichen) : "dawn";
-  const wxMap={晴:"",雨:"rain",雪:"snow",雾:"fog",雷:"thunder"};
-  const wc = wxMap[state?state.weather:"晴"]||"";
-  const wx = wc ? `<div class="wx wx-${wc}"></div>` : "";
-  el.innerHTML = inkSceneSVG(sc, ph) + `<div class="scene-tint phase-${ph}"></div>` + wx;
-}
-function choosePath(id){
-  const o=IDENTITIES[id];
-  $app.innerHTML=`<div class="title-art"><h1>择 道</h1><div class="sub">${o.name} · 你打算走哪条路？</div></div>
-  <div class="card"><div class="narr"><span class="nar">道有千万条，没有高下，只有合不合你的性子。这一选择，会一直在你的修为面板上。</span></div>
-  <div class="id-grid" id="paths"></div>
-  <div style="text-align:center;margin-top:12px"><button class="btn" id="bBackId">返回</button></div></div>`;
-  const pg=document.getElementById("paths");
-  Object.entries(PATHS).forEach(([pk,pv])=>{
-    const d=document.createElement("div"); d.className="id";
-    d.innerHTML=`<h3>${pv.name}</h3><p>${pv.desc}</p>`;
-    d.onclick=()=>beginGame(id,pk);
-    pg.appendChild(d);
+function showScene() {
+  const scene = Engine.generateScene();
+  Engine.setLastScene(scene);
+  let html = '';
+  if(scene.narration) html += `<div class="narration-box">${scene.narration}</div>`;
+  if(scene.dialogues) scene.dialogues.forEach(d => {
+    html += `<div class="dialogue-box"><div class="dialogue-speaker">${d.speaker}</div><div class="dialogue-content">${d.content}</div></div>`;
   });
-  document.getElementById("bBackId").onclick=()=>startScreen();
-}
-
-function startScreen(){
-  state=null;
-  $app.innerHTML = `
-  <div class="title-art">
-    <h1>剑 来</h1>
-    <div class="sub">开 放 世 界 · 人 生 模 拟 器</div>
-  </div>
-  <div class="card">
-    <div class="narr">
-<span class="hl">【作者寄语】</span>\n“碎碎平安，岁岁平安。”\n这句话，泥瓶巷的少年念了一辈子。\n这一次，你也住在泥瓶巷。\n愿你这一世，想留住的人，都留得住。\n——乘意
-    </div>
-    <div style="margin-top:14px">
-      <label style="color:var(--dim);font-size:14px">你的名字：</label>
-      <input class="name" id="pname" placeholder="如：陈平安 / 你自己的名字" value="陈平安" maxlength="8">
-      <div class="id-grid" id="ids"></div>
-    </div>
-    <div id="contWrap" style="margin-top:14px;text-align:center"></div>
-  </div>
-  <div class="footer">同人作品，致敬烽火戏诸侯《剑来》。剧情为原创演绎，非照搬原著。</div>`;
-  const ig=document.getElementById("ids");
-  Object.entries(IDENTITIES).forEach(([id,o])=>{
-    const d=document.createElement("div"); d.className="id";
-    d.innerHTML=`<h3>${o.name}</h3><p>${o.desc}</p>`;
-    d.onclick=()=>choosePath(id);
-    ig.appendChild(d);
+  document.getElementById('narration-area').innerHTML = html;
+  let choicesHtml = '';
+  scene.choices.forEach((c, i) => {
+    choicesHtml += `<button class="btn-ink btn-wide choice-btn" onclick="makeChoice(${i})">${c.text}<span class="choice-hint">${c.hint||''}</span>${c.risk?`<span class="choice-risk">${c.risk}</span>`:''}</button>`;
   });
-  if(localStorage.getItem(SAVE_KEY)){
-    const r=JSON.parse(localStorage.getItem(SAVE_KEY));
-    document.getElementById("contWrap").innerHTML=`<button class="btn" id="bCont" style="font-size:15px;padding:9px 20px;border-color:var(--gold);color:var(--gold2)">继 续 游 戏（${r.name}）</button>`;
-    document.getElementById("bCont").onclick=()=>{ if(load()){ ensureAttrs(state); renderBeat(); Audio.startMusic(); Audio.setMood("calm"); } };
+  document.getElementById('choices-area').innerHTML = choicesHtml;
+  updateUI();
+}
+
+function makeChoice(idx) {
+  AudioEngine.playClick();
+  const result = Engine.processChoice(idx);
+  if(result && result.special === 'travel') { showPanel('map'); return; }
+  if(result && result.special === 'free') {
+    const action = prompt('你想做什么？');
+    if(action) { Engine.freeAction(action); toast('你做了想做的事。',''); }
+    showScene(); return;
   }
-  renderScene();
-}
-
-function beginGame(id, pathKey){
-  const name=(document.getElementById("pname").value||"无名").trim().slice(0,8);
-  const o=IDENTITIES[id];
-  state={
-    name, id, pos:"open", node:"序", round:0, sinceRandom:0,
-    benxin:50, qixue:50, wufu:0, lianqi:0,
-    tupo:40, lingqi:30, jianyi:0, wuxing:45, gengu:45,
-    gongde:15, zuijie:0, shengwang:10, xinmo:0,
-    path:"散修", shichen:4, weather:"晴", scene:"lizhu",
-    items:["一个布包","几文钱"], relations:{}, flags:{}, returnTo:null, log:[], panelMode:"rich",
-  };
-  state.path = PATHS[pathKey] ? PATHS[pathKey].name : "散修";
-  Object.entries(o.fx).forEach(([k,v])=>{ if(k in state) state[k]=clamp(state[k]+v,0,k==="qixue"?50:100); });
-  if(PATHS[pathKey]) Object.entries(PATHS[pathKey].fx).forEach(([k,v])=>{ if(k in state) state[k]=clamp(state[k]+v,0,k==="qixue"?50:100); });
-  recomputeXinmo(state);
-  state.openLine=o.open;
-  state.idName=o.name;
-  pushLog(`出身【${o.name}】·道途【${state.path}】`);
-  save(); renderBeat();
-  Audio.startMusic(); Audio.setMood("calm");
-}
-
-function pushLog(t){ state.log.unshift(t); if(state.log.length>50) state.log.pop(); }
-function has(f){ return !!state.flags[f]; }
-
-function renderLines(arr){
-  return arr.filter(l=> !l.if || has(l.if)).map(l=>{
-    if(l.t==='nar') return `<span class="nar">${l.text}</span>`;
-    if(l.t==='say') return `<span class="say"><span class="who">${l.who}：</span>${l.text}</span>`;
-    return "";
-  }).join("");
-}
-
-function renderBeat(){
-  if(!state){ startScreen(); return; }
-  // 死亡判定
-  if(state.qixue<=0){ renderDeath("气血耗尽，你倒在了这片土地上。"); return; }
-  ensureAttrs(state);
-  const beat = state.pos.startsWith("RAND:") ? RANDOM[state.pos.slice(5)] : BEATS[state.pos];
-  if(!beat){ renderBeatEnd(); return; }
-  const nodeName = beat.node || beat.name || "自由";
-  state.node = nodeName;
-  renderScene();
-
-  let html=`<div class="topbar"><div class="who">姓名 <b>${state.name}</b> · <span style="color:var(--gold2)">${state.idName}</span> · <span style="color:var(--jade)">${SCENE_NAME[state.scene]||"江湖"}</span> · <span style="color:var(--dim)">${SHICHEN[state.shichen]}·${WEATHER_NAME[state.weather]}</span></div>
-    <div class="btns">
-      <button class="btn" id="bPanel">修为</button>
-      <button class="btn" id="bHint">提示</button>
-      <button class="btn" id="bSave">存档</button>
-      <button class="btn" id="bLoad">读档</button>
-      <button class="btn" id="bRestart">重开</button>
-      ${audioToggleHTML()}
-    </div></div>`;
-
-  html+=`<div class="card"><div class="chapter">${nodeName}</div>`;
-
-  // 序章附身份开场
-  if(state.pos==="open" && state.openLine){
-    html+=`<div class="narr"><span class="nar">${state.openLine}</span></div>`;
+  if(result && result.battle) { Engine._currentBattle = result.battle; startBattle(result.battle); return; }
+  if(result && result.scene) {
+    if(result.narration) document.getElementById('narration-area').innerHTML = `<div class="narration-box">${result.narration}</div>`;
+    showScene();
   }
-  html+=`<div class="narr">${renderLines(beat.lines)}</div>`;
-
-  // 播报条
-  const xinmoWarn = state.xinmo>=50 ? `｜<span style="color:var(--red)">心魔 ${state.xinmo}⚠</span>` : "";
-  html+=`<div class="broadcast">【本心 ${state.benxin}·${benxinTier(state.benxin)}｜气血 ${state.qixue}/50｜武夫·${WUFU[state.wufu]}｜练气·${LIANQI[state.lianqi]}｜功德 ${state.gongde}·罪孽 ${state.zuijie}｜${SHICHEN[state.shichen]}·${WEATHER_NAME[state.weather]}】${xinmoWarn}</div>`;
-
-  // 选项
-  const choices=(beat.choices||[]).filter(c=> !c.if || has(c.if));
-  html+=`<div class="choices">`+choices.map((c,i)=>{
-    let tags="";
-    if(c.tag) tags+=`<span class="tag">${c.tag}</span>`;
-    return `<div class="choice" data-i="${i}"><span>${c.label}</span>${tags}${c.hint?`<span class="hint">${c.hint}</span>`:""}</div>`;
-  }).join("")+`</div>`;
-
-  // 自由行动
-  html+=`<div class="free"><input id="freeIn" placeholder="自由行动：写下你想做的任何事……" maxlength="60"><button id="freeBtn">行动</button></div>`;
-
-  html+=`</div>`;
-  $app.innerHTML=html;
-
-  // 绑定
-  choices.forEach((c,i)=>{
-    $app.querySelector(`.choice[data-i="${i}"]`).onclick=()=>applyChoice(c);
-  });
-  document.getElementById("freeBtn").onclick=()=>{
-    const v=document.getElementById("freeIn").value.trim();
-    if(!v){ toast("先写点什么"); return; }
-    handleFree(v);
-  };
-  document.getElementById("bPanel").onclick=()=>renderStatsPanel();
-  document.getElementById("bHint").onclick=()=>renderHintPanel();
-  document.getElementById("bSave").onclick=()=>{ save(); toast("已存档"); };
-  document.getElementById("bLoad").onclick=()=>{ if(load()){ renderBeat(); toast("已读档"); } else toast("暂无存档"); };
-  document.getElementById("bRestart").onclick=()=>{ if(confirm("确定重开？当前进度将丢失。")) startScreen(); };
-  bindAudioToggles();
+  updateUI();
 }
 
-function applyChoice(c){
-  Audio.sfx("ui");
-  if(c.death){ renderDeath(c.deathText||"你死了。"); return; }
-  if(c.fx) applyFx(c.fx);
-  if(c.tag) pushLog(c.tag);
-  // 跳转
-  let go=c.go;
-  if(go==="__ending__"){ renderEnding(); return; }
-  if(go==="__free__"){ setFreeReturn(state.pos); renderFreeMode(); return; }
-  advanceTo(go);
+function showPanel(type) {
+  AudioEngine.playClick();
+  document.getElementById('panel-content').innerHTML = Engine['render'+type.charAt(0).toUpperCase()+type.slice(1)+'Panel'] ? Engine['render'+type.charAt(0).toUpperCase()+type.slice(1)+'Panel']() : '<p>暂无内容</p>';
+  document.getElementById('panel-overlay').style.display = 'flex';
 }
 
-function applyFx(fx){
-  const bB=state.benxin,bQ=state.qixue,bW=state.wufu,bL=state.lianqi,bJ=state.jianyi,bG=state.gongde,bZ=state.zuijie;
-  const numKeys=["benxin","qixue","wufu","lianqi","tupo","lingqi","jianyi","wuxing","gengu","gongde","zuijie","shengwang"];
-  numKeys.forEach(k=>{ if(fx[k]) state[k]=clamp((state[k]||0)+fx[k],0, k==="qixue"?50:100); });
-  if(fx.items){ // 字符串："加:xxx" 或 "去:xxx"
-    fx.items.forEach(s=>{
-      if(s.startsWith("加:")) state.items.push(s.slice(3));
-      else if(s.startsWith("去:")){ const i=state.items.indexOf(s.slice(3)); if(i>=0) state.items.splice(i,1); }
-    });
-  }
-  if(fx.xinmo) state.xinmo=clamp((state.xinmo||0)+fx.xinmo,0,100);
-  else recomputeXinmo(state);
-  // 心魔：破境不稳
-  const upRealm=(state.wufu>bW)||(state.lianqi>bL)||(state.jianyi>bJ);
-  if(upRealm && state.xinmo>60){ state.benxin=clamp(state.benxin-4,0,100); toast("心魔作祟，破境不稳（本心-4）"); }
-  // 视听反馈：根据数值变化触发音效与特效
-  const dW=state.wufu-bW, dL=state.lianqi-bL, dB=state.benxin-bB, dQ=state.qixue-bQ, dJ=state.jianyi-bJ;
-  if(dW>0||dL>0||dJ>0){ Audio.sfx("levelup"); FX.glow(); }
-  else if(dB>0||dQ>0){ Audio.sfx("good"); FX.flash("up"); }
-  else if(dB<0||dQ<0){ Audio.sfx("bad"); FX.flash("down"); if(dQ<=-3){ Audio.sfx("hit"); FX.shake(); } }
-  if(state.gongde>bG) Audio.sfx("good");
-  if(state.zuijie>bZ){ Audio.sfx("bad"); FX.flash("down"); }
+function showPanelHTML(title, content) {
+  document.getElementById('panel-content').innerHTML = `<h3 style="text-align:center;margin-bottom:15px">${title}</h3>${content}`;
+  document.getElementById('panel-overlay').style.display = 'flex';
 }
 
-function advanceTo(go){
-  // 随机事件注入
-  state.round++;
-  state.sinceRandom++;
-  if(go!=="__return__" && state.sinceRandom>=2 && Math.random()<0.55){
-    state.sinceRandom=0;
-    const cand=RANDOM_KEYS.filter(k=> !RANDOM[k].if || has(RANDOM[k].if));
-    const key=cand[Math.floor(Math.random()*cand.length)];
-    state.returnTo=go; // 随机事件后回到原计划节点
-    state.pos="RAND:"+key;
-    advanceTime(); state.scene=pickScene(state.pos); recomputeXinmo(state);
-    renderBeat();
-    return;
-  }
-  let pos = (go==="__return__") ? (state.returnTo||"post_roam") : go;
-  if(pos==="e9a" || (typeof pos==="string" && pos.indexOf("post")===0)) state.flags.left=true;
-  state.pos=pos;
-  advanceTime(); state.scene=pickScene(pos); recomputeXinmo(state);
-  Audio.setMood(pickMood(pos));
-  if(pos==="e_reveal_qi") Audio.sfx("reveal");
-  save(); renderBeat();
+function closePanel(e) { if(e.target===document.getElementById('panel-overlay')) document.getElementById('panel-overlay').style.display='none'; }
+
+function saveGame() {
+  AudioEngine.playClick(); Engine.saveToStorage(); toast('存档成功！','gain');
 }
 
-function renderDeath(text){
-  Audio.setMood("sorrow"); Audio.sfx("death"); FX.vignette();
-  $app.innerHTML=`<div class="topbar"><div class="who">姓名 <b>${state.name}</b></div>
-    <div class="btns">${audioToggleHTML()}<button class="btn" id="bRestart">重开</button></div></div>
-    <div class="death"><div class="t">死 亡 · 收 束</div>
-    <div class="d">${text}\n\n世界不会等你。想再走一遍——换一个身份，或换一条路。</div></div>
-    <div class="footer">诸天万界，江湖再见。</div>`;
-  clearSave();
-  bindAudioToggles();
-  document.getElementById("bRestart").onclick=()=>startScreen();
-}
-
-function renderEnding(){
-  const badEnd = state.benxin<=15 || state.xinmo>=80;
-  Audio.setMood(badEnd?"sorrow":"grand");
-  Audio.sfx(badEnd?"endingBad":"endingGood");
-  if(!badEnd) FX.glow();
-  const s=state;
-  let title,rank,body;
-  if(s.benxin<=15){
-    title="灰烬"; rank="结局 · 心魔渐生";
-    body="你守不住自己的本心。\n这一世，你活成了自己最厌的模样——剑，终究反过来持了你。";
-  } else if(s.benxin>=85 && s.flags["知齐先生身份"]){
-    title="持剑的君子"; rank="隐藏结局 · 道理与剑";
-    body="你既守得住本心，也懂齐先生画地为牢的苦心。\n你成了那种人：持剑，却只为护无力者；讲道理，却肯为道理赴死。\n山水有相逢，你选了最难走的那条——可你从不后悔。";
-  } else if(s.lianqi>=8){
-    title="剑气长存"; rank="结局 · 剑修";
-    body="你走通了练气士的路，剑心通明。\n有人问你持剑的理由，你只答：‘剑在手中，便有人敢抬头。’";
-  } else if(s.wufu>=4){
-    title="一拳如日中天"; rank="结局 · 武夫";
-    body="你走武道路，拳出如日。\n陈平安若还在，定拍着你肩笑：‘可以啊，比我有出息。’";
-  } else if(s.benxin>=72){
-    title="道理行天下"; rank="结局 · 文圣一脉";
-    body="你开书院，讲道理，以一言止干戈。\n天下读书人，称你一声先生。";
-  } else {
-    title="山水有相逢"; rank="结局 · 隐者";
-    body="你没成大势，也没开宗立派。\n在落魄山脚下开了片茶园，偶尔替邻里的孩子看看风水。\n有人问值不值，你笑：‘这天地很大，不必人人都去当英雄。’";
-  }
-  const rel = Object.keys(s.relations).length? Object.entries(s.relations).map(([k,v])=>`${k}：${v}`).join("；") : "尚无深交";
-  $app.innerHTML=`<div class="topbar"><div class="who">姓名 <b>${s.name}</b></div>
-    <div class="btns">${audioToggleHTML()}<button class="btn" id="bRestart">重开</button></div></div>
-    <div class="card" style="text-align:center">
-      <div style="font-size:28px;letter-spacing:6px;color:var(--gold2)">${title}</div>
-      <div style="color:var(--gold);letter-spacing:3px;margin:6px 0 12px">${rank}</div>
-      <div class="narr" style="white-space:pre-wrap">${body}</div>
-    </div>
-    <div class="card"><div class="rpanel">
-      <div class="big">『一生总览』</div><div class="rule"></div>
-      <div class="nm">${s.name}</div>
-      <div><span class="lb">本心：</span><span style="color:#c0392b">${s.benxin}/100（${benxinTier(s.benxin)}）</span>　<span class="lb">气血：</span><span style="color:#c0392b">${s.qixue}/50</span></div>
-      <div style="margin:6px 0"><span class="pill">武夫</span><b>${WUFU[s.wufu]}</b>　<span class="pill2">练气士</span><b>${LIANQI[s.lianqi]}</b>　<span class="pill">剑意</span><b>${s.jianyi}（${jianyiTier(s.jianyi)}）</b></div>
-      <div style="margin:6px 0"><span class="pill">体魄</span>${s.tupo}　<span class="pill2">灵气</span>${s.lingqi}　<span class="pill">悟性</span>${s.wuxing}　<span class="pill2">根骨</span>${s.gengu}</div>
-      <div style="margin:6px 0"><span class="pill">功德</span>${s.gongde}　<span class="pill2">罪孽</span>${s.zuijie}　<span class="pill">声望</span>${s.shengwang}　<span class="pill2">心魔</span><b style="color:${s.xinmo>=50?'#b5462f':'#8b6914'}">${s.xinmo}</b></div>
-      <div><span class="lb">道途：</span>${s.path}　<span class="lb">所在：</span>${SCENE_NAME[s.scene]||"江湖"}　<span class="lb">${SHICHEN[s.shichen]}·${WEATHER_NAME[s.weather]}</span></div>
-      <div><span class="lb">因缘：</span><span style="color:#5a8c6a">${rel}</span></div>
-      <div><span class="lb">行迹：</span><span style="color:#8b6914">${s.log.slice(0,8).join(" · ")||"—"}</span></div>
-    </div></div>
-    <div class="footer">诸天万界，江湖再见。</div>`;
-  clearSave();
-  bindAudioToggles();
-  document.getElementById("bRestart").onclick=()=>startScreen();
-}
-
-/* ================= 自由行动（关键词规则近似） ================= */
-function setFreeReturn(pos){ state.returnTo=pos; }
-
-function handleFree(text){
-  const t=text;
-  Audio.sfx("ui");
-  let reaction="你做了这件事。风过巷口，没人特别在意——但你自己记得。";
-  let fx={};
-  if(/(打|揍|揍他|杀|砍)/.test(t)){
-    const targets=["陈平安","宁姚","齐静春","刘羡阳","顾璨","搬山猿","蔡金简","杨老头","陆沉","宋集薪","阮秀","稚圭","刘志茂","马苦玄"];
-    const hit=targets.find(n=>t.includes(n));
-    if(hit){
-      reaction=`你对${hit}动了手。按他的性子，这一下，结下了——或是一笔要还的账，或是一记更重的回击。`;
-      fx={benxin:-3, qixue:-2, zuijie:4};
-    } else { reaction="你对空气挥了几拳，像个不懂事的孩子。"; fx={benxin:-1, zuijie:1}; }
-  } else if(/(骂|怼|嘲|讽)/.test(t)){
-    reaction="你出言不逊。话出口容易，收回难——旁人看你的眼神，淡了一分。"; fx={benxin:-2, zuijie:2};
-  } else if(/(偷|拿|摸|窃)/.test(t)){
-    reaction="你伸手拿了不该拿的东西。世界有牙，偷来的，迟早要还。"; fx={benxin:-4, zuijie:5};
-  } else if(/(撩|逗|调戏|喜欢你)/.test(t)){
-    reaction="你拿这话去撩人。有人脸红拔剑，有人嗤之以鼻——总之，你惹了点动静。"; fx={benxin:-2};
-  } else if(/(送|给|请|递|帮|救|护|扶)/.test(t)){
-    reaction="你诚心待人、伸出手。护人者，人恒护之；古道热肠的人，记恩。"; fx={benxin:2, gongde:3};
-  } else if(/(问|探|查|找)/.test(t)){
-    reaction="你开口打探。肯答的人，自会答；不肯答的，你逼不出半句。"; fx={};
-  } else if(/(练|修|学|打坐|悟|剑|拳|读|书|经)/.test(t)){
-    reaction="你沉下心练了一会儿（或读一卷书）。成长不在一朝一夕，但这一步，算数。"; fx={benxin:1, lingqi:3, jianyi:2, wuxing:3};
-  }
-  applyFx(fx);
-  if(fx.benxin||fx.qixue) pushLog("自由行动："+t.slice(0,12));
-  // 回到原节点的自由模式展示
-  const beat=BEATS[state.returnTo||state.pos];
-  $app.insertAdjacentHTML("beforeend",
-    `<div class="card"><div class="narr"><span class="nar">${reaction}</span></div>
-     <div class="broadcast">【本心 ${state.benxin}·${benxinTier(state.benxin)}｜气血 ${state.qixue}/50｜武夫·${WUFU[state.wufu]}｜练气·${LIANQI[state.lianqi]}】</div>
-     <div class="choices"><div class="choice" id="backChoice"><span>继续（回到刚才的路口）</span></div></div></div>`);
-  const bc=document.getElementById("backChoice");
-  if(bc) bc.onclick=()=>{ state.pos=state.returnTo||state.pos; state.returnTo=null; renderBeat(); };
-  // 滚动到底
-  window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"});
-}
-
-function renderFreeMode(){
-  // 自由模式下展示当前 beat 的旁白 + 一个自由输入框，可继续自由行动或点“继续”
-  const beat=BEATS[state.returnTo]||BEATS[state.pos];
-  $app.innerHTML=`<div class="topbar"><div class="who">姓名 <b>${state.name}</b> · 自由行动</div>
-    <div class="btns"><button class="btn" id="bBack">回到路口</button><button class="btn" id="bPanel">修为</button></div></div>
-    <div class="card"><div class="chapter">${beat?beat.node:"自由"}</div>
-    <div class="narr"><span class="nar">你想做什么，都写下吧。世界会回应你——只是回应，未必如你所愿。</span></div>
-    <div class="free"><input id="freeIn2" placeholder="写下你的行动……" maxlength="60"><button id="freeBtn2">行动</button></div>
+function showLoadPanel() {
+  AudioEngine.init();AudioEngine.resume();
+  const saves = JSON.parse(localStorage.getItem('jianlai_saves')||'[]');
+  if(saves.length===0) { toast('没有存档','loss'); return; }
+  let h = '<h3 style="text-align:center;margin-bottom:15px">读取存档</h3>';
+  saves.forEach(s => {
+    h += `<div class="card-ink" onclick="loadSave(${s.id})" style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between">
+        <span>${s.summary||'存档'}</span>
+        <span style="font-size:0.8rem;color:var(--ink-gray)">${s.time||''}</span>
+      </div>
     </div>`;
-  document.getElementById("freeBtn2").onclick=()=>{
-    const v=document.getElementById("freeIn2").value.trim(); if(!v){toast("先写点什么");return;}
-    handleFree(v);
-  };
-  document.getElementById("bBack").onclick=()=>{ state.pos=state.returnTo; state.returnTo=null; renderBeat(); };
-  document.getElementById("bPanel").onclick=()=>renderStatsPanel();
+  });
+  document.getElementById('panel-content').innerHTML = h;
+  document.getElementById('panel-overlay').style.display = 'flex';
 }
 
-/* ================= 面板 ================= */
-function renderStatsPanel(){
-  const rich = state.panelMode!=="text";
-  if(rich){
-    const items = state.items.length? state.items.join("、") : "一个布包，几文钱";
-    const rel = Object.keys(state.relations).length? Object.entries(state.relations).map(([k,v])=>`<div style="color:#5a8c6a">${k}：${v}</div>`).join("") : `<div style="color:#999">尚无深交</div>`;
-    const html=`<div class="card"><div class="rpanel">
-      <div class="big">『修为』</div>
-      <div class="rule"></div>
-      <div class="nm">${state.name}</div> <span style="color:#8b6914">${state.idName} · ${state.node}</span>
-      <div><span class="lb">本心·心境：</span><span style="color:#c0392b">${state.benxin}/100（${benxinTier(state.benxin)}）</span>　<span class="lb">气血：</span><span style="color:#c0392b">${state.qixue}/50</span></div>
-      <div style="margin:6px 0"><span class="pill">武夫</span><b>${WUFU[state.wufu]}</b>　<span class="pill2">练气士</span><b>${LIANQI[state.lianqi]}</b>　<span class="pill">剑意</span><b>${state.jianyi}（${jianyiTier(state.jianyi)}）</b></div>
-      <div style="margin:6px 0"><span class="pill">体魄</span>${state.tupo}　<span class="pill2">灵气</span>${state.lingqi}　<span class="pill">悟性</span>${state.wuxing}　<span class="pill2">根骨</span>${state.gengu}</div>
-      <div style="margin:6px 0"><span class="pill">功德</span>${state.gongde}　<span class="pill2">罪孽</span>${state.zuijie}　<span class="pill">声望</span>${state.shengwang}　<span class="pill2">心魔</span><b style="color:${state.xinmo>=50?'#b5462f':'#8b6914'}">${state.xinmo}</b></div>
-      <div><span class="lb">道途：</span>${state.path}　<span class="lb">所在：</span>${SCENE_NAME[state.scene]||"江湖"}　<span class="lb">${SHICHEN[state.shichen]}·${WEATHER_NAME[state.weather]}</span></div>
-      <div><span class="lb">随身：</span><span class="item">${items}</span>　<span class="sts">状态 · ${state.qixue<=5?'濒死':state.qixue<15?'虚弱':'无异常'}</span></div>
-      <div class="rule"></div>
-      <div style="color:#5a3a1a;font-weight:700">同行伙伴</div>
-      <div>${rel}</div>
-    </div></div>`;
-    showOverlay(html);
-  } else {
-    const lines=[
-      `『修为面板』`,
-      `名字：${state.name}（${state.idName}）`,
-      `道途：${state.path}`,
-      `所在：${SCENE_NAME[state.scene]||"江湖"}　${SHICHEN[state.shichen]}·${WEATHER_NAME[state.weather]}`,
-      `本心·心境：${state.benxin}/100（${benxinTier(state.benxin)}）`,
-      `气血：${state.qixue}/50`,
-      `武夫：${WUFU[state.wufu]}　练气士：${LIANQI[state.lianqi]}　剑意：${state.jianyi}（${jianyiTier(state.jianyi)}）`,
-      `体魄：${state.tupo}　灵气：${state.lingqi}　悟性：${state.wuxing}　根骨：${state.gengu}`,
-      `功德：${state.gongde}　罪孽：${state.zuijie}　声望：${state.shengwang}　心魔：${state.xinmo}`,
-      `随身：${state.items.length?state.items.join("、"):"一个布包，几文钱"}`,
-      `状态：${state.qixue<=5?'濒死':state.qixue<15?'虚弱':'无异常'}`,
-    ];
-    showOverlay(`<div class="card"><div class="simplelog">${lines.map(l=>`<div>${l}</div>`).join("")}</div></div>`);
+function loadSave(id) {
+  const saves = JSON.parse(localStorage.getItem('jianlai_saves')||'[]');
+  const save = saves.find(s=>s.id===id);
+  if(!save) { toast('存档读取失败','loss'); return; }
+  gameState = save.data;
+  document.getElementById('title-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+  document.getElementById('panel-overlay').style.display = 'none';
+  Engine.init(gameState);
+  AudioEngine.playTheme('town');
+  updateUI(); showScene();
+  toast('存档已读取','gain');
+}
+
+function loadGame() { showLoadPanel(); }
+
+function toggleMusic() { const en=AudioEngine.toggleMusic(); document.getElementById('music-btn').style.opacity=en?1:0.4; }
+function toggleSfx() { const en=AudioEngine.toggleSfx(); document.getElementById('sfx-btn').style.opacity=en?1:0.4; }
+
+function travelTo(locId) {
+  Engine.travelTo(locId);
+  updateUI(); showScene();
+  toast('来到'+LOCATIONS[locId].name,'event');
+}
+
+function startBattle(battle) {
+  document.getElementById('game-screen').style.display='none';
+  document.getElementById('battle-screen').style.display='block';
+  renderBattle(battle);
+}
+
+function renderBattle(battle) {
+  document.getElementById('battle-title').textContent = battle.title||'战斗';
+  let h = `<div class="battle-entity"><span style="font-size:1rem">${gameState.name}</span><span style="color:var(--ink-gray);margin-left:auto">HP: ${battle.myHp}/${battle.myHpMax}</span><div class="stat-bar" style="width:80px"><div class="stat-fill body" style="width:${(battle.myHp/battle.myHpMax)*100}%"></div></div></div>`;
+  h += '<div style="text-align:center;color:var(--ink-gray);padding:5px;font-size:0.8rem">⚔️ VS ⚔️</div>';
+  h += `<div class="battle-entity"><span style="font-size:1rem;color:var(--ink-red)">${battle.enemy.name}</span><span style="color:var(--ink-gray);margin-left:auto">HP: ${battle.enemy.hp}/${battle.enemy.hpMax}</span><div class="stat-bar" style="width:80px"><div class="stat-fill demon" style="width:${(battle.enemy.hp/battle.enemy.hpMax)*100}%"></div></div></div>`;
+  document.getElementById('battle-arena').innerHTML = h;
+  let ah = '';
+  battle.actions.forEach((a,i) => { ah += `<button class="btn-ink btn-small" onclick="battleAction(${i})">${a.name}</button>`; });
+  document.getElementById('battle-actions').innerHTML = ah;
+  document.getElementById('battle-log').innerHTML = '<div class="log-entry">战斗开始！</div>';
+}
+
+function battleAction(idx) {
+  AudioEngine.playClick();
+  const result = Engine.battleAction(idx);
+  document.getElementById('battle-log').innerHTML += `<div class="log-entry ${result.type}">${result.text}</div>`;
+  document.getElementById('battle-log').scrollTop = document.getElementById('battle-log').scrollHeight;
+  renderBattle(result.battle);
+  if(result.battle.finished) {
+    if(result.battle.won) toast('战斗胜利！','gain'); else if(result.type==='escape') toast('成功撤退',''); else toast('战败...','loss');
+    setTimeout(()=>{document.getElementById('battle-screen').style.display='none';document.getElementById('game-screen').style.display='block';showScene();},1500);
   }
-}
-function renderHintPanel(){
-  const near = nearUnmet();
-  const html=`<div class="card"><div class="rpanel">
-    <div class="big">【提示】</div><div class="rule"></div>
-    <h4>眼下可做的事</h4><ul>
-      <li>沿主线推进：当前节点「${state.node}」，顺应/搞事/观望各有代价</li>
-      <li>输入「修为」看面板，「提示」看本面板</li>
-    </ul>
-    <h4>人物往来</h4><ul>${near.map(n=>`<li>${n}</li>`).join("")}</ul>
-    <h4>修炼</h4><ul>
-      <li>武夫：随剧情/采药/护人积累，破境需事件支撑</li>
-      <li>练气士：寻名师指点（齐先生/阿良/宁姚）方可入门</li>
-    </ul>
-    <h4>心境 · 功德 · 天地</h4><ul>
-      <li>心魔 = 罪孽 − 本心 − 功德；作恶杀戮积罪孽，读书行善消心魔。心魔过高破境不稳，甚至走火入魔</li>
-      <li>功德/罪孽会被文庙、山神与各方势力记下，影响 NPC 对待与后续机缘</li>
-      <li>昼夜晴雨时刻在变——雷雨助雷法，夜阑鬼魅更盛，留意顶部播报条</li>
-    </ul>
-  </div></div>`;
-  showOverlay(html);
-}
-function nearUnmet(){
-  const met=Object.keys(state.relations);
-  const pool=["陈平安","宁姚","齐静春","刘羡阳","顾璨","杨老头","陆沉","阮秀","宋集薪","稚圭","刘志茂","搬山猿","蔡金简","郑大风","阿良","崔东山"];
-  return pool.filter(p=>!met.includes(p)).slice(0,4).map(p=>`${p}：尚未深交`);
+  updateUI();
 }
 
-let overlayEl=null;
-function showOverlay(html){
-  if(!overlayEl){
-    overlayEl=document.createElement("div");
-    overlayEl.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:flex;align-items:center;justify-content:center;padding:20px;";
-    overlayEl.onclick=(e)=>{ if(e.target===overlayEl) overlayEl.remove(); };
-    document.body.appendChild(overlayEl);
-  }
-  overlayEl.innerHTML=`<div style="max-height:86vh;overflow:auto;width:100%;max-width:640px" onclick="event.stopPropagation()">${html}<div style="text-align:center;margin-top:8px"><button class="btn" onclick="this.closest('.card').parentElement.parentElement.remove()">关闭</button></div></div>`;
-  // 修正关闭逻辑
-  const btn=overlayEl.querySelector("button");
-  btn.onclick=()=>overlayEl.remove();
+// 通知系统
+function toast(msg, type) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => { if(el.parentNode) el.parentNode.removeChild(el); }, 3000);
 }
 
-function renderBeatEnd(){
-  $app.innerHTML=`<div class="card"><div class="narr">这一章到此。你说的「本章结束」，江湖自有回响。</div></div>`;
+// 死亡触发
+function triggerDeath(reason, legacy) {
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('death-screen').style.display = 'block';
+  document.getElementById('death-text').textContent = reason;
+  document.getElementById('death-legacy').textContent = legacy;
+  AudioEngine.playNegative();
 }
-
-startScreen();
 </script>
 </body>
 </html>
